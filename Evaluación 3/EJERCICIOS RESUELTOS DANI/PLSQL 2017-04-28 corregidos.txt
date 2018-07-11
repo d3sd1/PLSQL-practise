@@ -1,0 +1,152 @@
+10.	Dado el siguiente procedimiento:
+	CREATE OR REPLACE PROCEDURE crear_depart (
+	v_num_dept depart.dept_no%TYPE,
+	v_dnombre depart.dnombre%TYPE DEFAULT 'PROVISIONAL',
+	v_loc depart.loc%TYPE DEFAULT 'PROVISIONAL')
+	IS
+	BEGIN
+	INSERT INTO depart
+	VALUES (v_num_dept, v_dnombre, v_loc);
+	END crear_depart;
+
+	Indicar cuáles de las siguientes llamadas son correctas y cuáles incorrectas, en este último caso escribir la llamada correcta usando la notación posicional (en los casos que se pueda):
+			crear_depart;								-- 1º INCORRECTA
+			crear_depart(50);							-- 2º CORRECTA
+			crear_depart('COMPRAS');					-- 3º INCORRECTA
+			crear_depart(50,'COMPRAS');					-- 4º CORRECTA
+			crear_depart('COMPRAS', 50);				-- 5º INCORRECTA
+			crear_depart('COMPRAS', 'VALENCIA');		-- 6º INCORRECTA
+			crear_depart(50, 'COMPRAS', 'VALENCIA');	-- 7º CORRECTA
+			crear_depart('COMPRAS', 50, 'VALENCIA');	-- 8º INCORRECTA
+			crear_depart('VALENCIA', 'COMPRAS');		-- 9º INCORRECTA
+			crear_depart('VALENCIA', 50);				-- 10º CORRECTA
+
+------------------------------------------------------------------------------------------------------------------
+		
+15. Implementar un procedimiento que reciba un importe y visualice el desglose del cambio en unidades monetarias de 1, 5, 10, 25, 50, 100, 200, 500, 1000, 2000, 5000 Ptas. en orden inverso al que aparecen aquí enumeradas.
+		CREATE OR REPLACE PROCEDURE desglose_cambio (importe number)
+		AS
+			cambio NATURAL:=importe;
+			moneda NATURAL;
+			v_uni_moneda NATURAL;
+		BEGIN
+			DBMS_OUTPUT.PUT_LINE('***DESGLOSE DE: '||importe);
+			WHILE cambio>0 LOOP
+				IF cambio>=5000 THEN
+					moneda:=5000;
+				ELSIF cambio>=2000 THEN
+					moneda:=2000;
+				ELSIF cambio>=1000 THEN
+					moneda:=1000;
+				IF cambio>=500 THEN
+					moneda:=500;
+				ELSIF cambio>=200 THEN
+					moneda:=200;
+				ELSIF cambio>=100 THEN
+					moneda:=100;		
+				IF cambio>=50 THEN
+					moneda:=50;
+				ELSIF cambio>=25 THEN
+					moneda:=25;
+				ELSIF cambio>=10 THEN
+					moneda:=10;
+				ELSIF cambio>=5 THEN
+					moneda:=5;
+				ELSE moneda:=1;		
+				ENDIF;
+				v_uni_moneda:=TRUNC(cambio/moneda);
+				DBMS_OUTPUT.PUT_LINE(v_uni_moneda||'unidades de: '||moneda||' Ptas.');
+				cambio:=mOD(cambio,moneda);
+			END LOOP;
+		END;
+		
+------------------------------------------------------------------------------------------------------------------
+
+16. Codificar un procedimiento que permita borrar un empleado cuyo número se pasará en la llamada.
+		CREATE OR REPLACE PROCEDURE borrar_empl (
+			num_emp employees.empno%type,
+			pcont OUT number	--añadido
+		)
+		AS
+		BEGIN
+			DELETE FROM employees
+			WHERE empno=num_emp;
+			pcont:=sql.rowcont; --añadido. Es una variable interna que nos dice el número de registros modificados en cualquier transacción.
+		END;
+	--------------------------
+	BLOQUE ANÓNIMO:
+
+		DECLARE
+			pcont number(1);
+		BEGIN
+			--(llamada al procedimiento)
+			if pcont=1 then
+				DBMS_OUTPUT.PUT_LINE('Borrado correcto');
+			else
+				DBMS_OUTPUT.PUT_LINE('No se encuentra');
+			end if;
+		END;
+
+------------------------------------------------------------------------------------------------------------------
+
+17. Escribir un procedimiento que modifique la localidad de un departamento. El procedimiento recibirá como parámetros el número del departamento y la localidad nueva.
+		CREATE OR REPLACE PROCEDURE modificar_localidad (
+			numdep departments.deptno%TYPE,
+			localidad departments.location%TYPE,
+			pcont OUT number
+		)
+		AS
+		BEGIN
+			UPDATE departments
+			SET	location=localidad
+			WHERE deptno=numdep;
+			pcont:=sql.rowcont;
+		END;
+	--------------------------
+	BLOQUE ANÓNIMO:
+		DECLARE
+			pcont number(1);
+		BEGIN
+			--(llamada al procedimiento)
+			if pcont=1 then
+				DBMS_OUTPUT.PUT_LINE('Borrado correcto');
+			else
+				DBMS_OUTPUT.PUT_LINE('No se encuentra');
+			end if;
+		END;
+	
+------------------------------------------------------------------------------------------------------------------
+
+18. Crear un procedimiento que reciba como parámetros el número de un empleado y, por referencia, se le pase un parámetro de tipo localidad del departamento del empleado. En la llamada ese parámetro irá sin valor. El procedimiento recogerá la localidad del departamento si la tuviere. En un bloque anónimo, llamaremos al procedimiento y evaluaremos dicha localidad, si tiene valor, lo sacaremos por pantalla, si no tiene nada, diremos que está vacío.
+		CREATE OR REPLACE PROCEDURE LOCALIDAD (
+			pNumEmp employees.empno%TYPE,
+			plocalidad OUT departments.location%TYPE
+		)
+		AS
+		BEGIN
+			select location into plocalidad
+			from employees e
+			join departments d
+			on e.deptno=d.deptno
+			where empno=pNumEmp;
+		END;
+	--------------------------
+	BLOQUE ANÓNIMO:
+		DECLARE
+			vNumEmp employees empno%TYPE:=&v;
+			vlocalidad departments.location%TYPE;
+		BEGIN
+			localidad(vNumEmp,vlocalidad);
+			if vlocalidad is null then
+				DBMS_OUTPUT.PUT_LINE('El departamento del empleado no tiene localidad')
+			else
+				DBMS_OUTPUT.PUT_LINE('La localidad del departmamento del empleado es: '||vlocalidad);
+			end if;
+		END;
+
+------------------------------------------------------------------------------------------------------------------
+	
+19.	Visualizar todos los procedimientos y funciones del usuario almacenados en la base de datos y su situación (valid o invalid).
+		select OBJECT.NAME, OBJECT_TYPE, STATUS
+		from USER_OBJECTS
+		WHERE OBJECT_TYPE IN ('PROCEDURE','FUNCTION');

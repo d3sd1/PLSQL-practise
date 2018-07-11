@@ -1,0 +1,37 @@
+CREATE OR REPLACE PROCEDURE EJ13 (salmin employees.msal%type, salmax employees.msal%type) AS
+	Cursor C1 IS
+		select ename, msal
+		from employees
+		where msal between salmin and salmax
+		for update of msal NOWAIT;
+	Cursor C2 IS
+		select lowerlimit, upperlimit
+		from salgrades;
+	vControl number:=0;
+	vGrade number;
+	
+	
+BEGIN
+	select grade into vGrade
+	from salgrades
+	where salmin=lowerlimit and salmax=upperlimit;
+	for reg in C1 loop
+		DBMS_OUTPUT.PUT_LINE(Empleado a modificar: '||reg.ename||' Sueldo a modificar: '||reg.msal);
+		update employees set msal=msal+100
+		where current of C1;
+		vControl:=1;
+	end loop;
+	if vControl=0 then
+		DBMS_OUTPUT.PUT_LINE('No se ha encontrado ningún empleado en ese rango');
+	end if;
+	EXCEPTION
+		WHEN NO_DATA_FOUND then
+			DBMS_OUTPUT.PUT_LINE('Debes introducir un rango válido.');
+			for reg2 in C2 LOOP
+				DBMS_OUTPUT.PUT_LINE(reg2.lowerlimit||','||reg2.upperlimit);
+			end loop;
+		WHEN INVALID_CURSOR then
+			DBMS_OUTPUT.PUT_LINE('Cursor no válido.');
+		WHEN OTHERS THEN
+			DBMS_OUTPUT.PUT_LINE('Se ha producido un error inesperado');
+	END;

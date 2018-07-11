@@ -1,0 +1,18 @@
+8.	Escribir una función que reciba una fecha y devuelva el año, en número, correspondiente a esa fecha.
+
+
+ANÓNIMO
+	BEGIN
+		DMBS_OUTPUT.PUT_LINE(anio('10/02/2003'));
+	END;
+
+
+FUNCIÓN
+	CREATE OR REPLACE FUNCTION anio (pfecha DATE)
+	RETURN number
+	AS
+		v_anio number;
+	BEGIN
+		v_anio=TO_NUMBER(TO_CHAR(fecha,'yyyy'));
+		RETURN v_anio;
+	END

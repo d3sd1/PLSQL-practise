@@ -1,0 +1,39 @@
+Ejercicio 11 corregido
+	---------FUNCIÓN-----------
+	Create or replace function anios_dif(fecha1 DATE, fecha2 DATE)
+	RETURN number
+	AS
+		v_anios_dif number(4);
+	BEGIN
+		v_anios_dif:=ABS(TRUNC(MONTHS_BETWEEN(fecha2m fecha1)/12));
+		RETURN v_anios_dif;
+	END;
+
+
+	---------ANÓNIMO-----------
+	DECLARE
+		fecha1 DATE :=&v;
+		fecha2 DATE :=&v;
+	BEGIN
+		DBMS_OUTPUT.PUT_LINE('El número de años es:'||anios_dif(fecha2,fecha1));
+	END;
+	
+	
+Ejercicio 12 corregido
+	---------FUNCIÓN-----------
+	CREATE OR REPLACE trienios (fecha1 DATE, fecha2 dATE)
+	RETURN Number
+		AS	v_trienios Number(4);
+	BEGIN
+		v_trienios:=TRUNC(anios_dif(fecha2,fecha1)/3);
+		RETURN v_trienios;
+	END;
+	
+	---------ANÓNIMO-----------
+	DECLARE
+		fecha1 DATE :=&v;
+		fecha2 DATE :=&v;
+	BEGIN
+		DBMS_OUTPUT.PUT_LINE('El número de años es:'||trienios(fecha2,fecha1));
+	END;
+	

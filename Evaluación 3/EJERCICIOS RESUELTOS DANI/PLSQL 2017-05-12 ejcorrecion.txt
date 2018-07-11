@@ -1,0 +1,82 @@
+6.
+	declare
+		cursor cursor_emp is
+			select msal
+			from employees
+			for update of msal NOWAIT;
+			--con for update NOWAIT bloqueas TODOS los registros afectados por el cursor para evitar errores inesperados (evitas que otro proceso pueda acceder a ellos o cambiarlos antes de que sean actualizados). Si no lo pones, sólo actualizas el registro que estás actualizando en ese momento.
+		v_msal.employees.msal %type;
+	BEGIN
+		OPEN cursor_emp;
+		LOOP
+			FETCH cursor_emp into v_msal;
+			EXIT WHEN cursor_emp%NOTFOUND;
+			IF v_msal<1650 THEN
+				update employees set msal=(msal*1.10)
+				where current of cursor_emp;
+			END IF;	
+		END LOOP;
+			CLOSE cursor_emp;
+	END;
+
+	
+7. 
+	create or replace PROCEDURE EJ7 AS
+		cursor CEmp is
+			select e.empno, e.msal, s.grade
+			from employees e
+			join salgrades s
+			on (e.msal BETWEEN s.lowerlimit and s.upperlimit)
+			for update of msal NOWAIT;
+		BEGIN
+			for reg in CEmp loop
+				if (reg.grade<4) then
+					update employees set msal=msal+500
+					where current of CEmp;
+				else if (reg.grade>4) then
+					update employees set msal=msal+1000
+					where current of CEmp;
+				end if;
+			end loop;
+		END;
+
+
+
+8. CREATE OR REPLACE PROCEDURE EJE8 AS
+	cursor cEmp is 
+		select e.empno, e.ename, e.msal, s.grade
+		from employees e
+		join departments d
+		on (e.deptno = d.deptno)
+		join salgrades s
+		on (e.msal BETWEEN s.lowerlimit and s.upperlimit)
+		where dname='SALES'
+		for update of msal NOWAIT;
+	BEGIN
+		for reg in cEmp loop
+			if (reg.grade>2) then
+				UPDATE employees SET msal = msal +1000
+				where current of cEmp;
+			end if;
+		end loop;
+	END;
+	
+	
+9.
+	Create or replace PROCEDURE procIncrementarSalario (pPorcentaje IN number)
+	AS
+		vMedia employees.msal%type;
+		cursor c1 is
+			select empno, msal
+			from employees
+			for update of msal;
+	BEGIN
+		select avg(msal) into vMedia
+		from employees;
+		FOR reg in c1 LOOP
+			if (reg.msal>vMedia) then
+				update employees set msal = msal+(msal*pPorcentaje)/100
+				where current of C1;
+			end if;
+		end loop;
+	END;

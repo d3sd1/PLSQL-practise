@@ -1,0 +1,28 @@
+CREATE OR REPLACE PROCEDURE EJER3
+AS 
+CURSOR c1 IS
+    SELECT * FROM departments;
+vCourse offerings.course%type;
+BEGIN
+  FOR reg1 IN c1 LOOP
+    BEGIN
+        SELECT course INTO vCourse 
+        FROM offerings 
+        WHERE location=reg1.location;
+        DBMS_OUTPUT.PUT_LINE(reg1.location || '/si');
+        EXCEPTION
+            WHEN NO_DATA_FOUND THEN
+            DBMS_OUTPUT.PUT_LINE(reg1.location || '/no');
+            WHEN TOO_MANY_ROWS THEN
+            DBMS_OUTPUT.PUT_LINE(reg1.location || '/si (múltiples cursos)');
+            WHEN OTHERS THEN
+            DBMS_OUTPUT.PUT_LINE('Error inesperado.');
+    END;
+  END LOOP;
+END EJER3;
+------------------
+DECLARE
+
+BEGIN
+EJER3();
+END;

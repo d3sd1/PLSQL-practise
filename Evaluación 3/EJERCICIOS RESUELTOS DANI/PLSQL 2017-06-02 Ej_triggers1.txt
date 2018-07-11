@@ -1,0 +1,40 @@
+/*1. Crear un trigger que cuando inserte un nuevo empleado,
+
+compruebe que si su salario está en grado 3,
+  la comisión que se le está insertando la ponga a 0.
+
+Los empleados nuevos si tienen ese rango salarial no pueden tener comisión*/
+
+	/*TRIGGER*/
+		create or replace TRIGGER "TRIGGER1_EJ1" 
+		  BEFORE INSERT ON EMPLOYEES
+		  FOR EACH ROW
+		  WHEN(NEW.msal=3)
+		BEGIN
+			--INSERT INTO employees(comm) VALUES(0); 
+			:NEW.comm:=0;
+		END;
+
+
+/*2. Crear un trigger que al actualizar el salario de un empleado
+	inserte en una tabla de auditoría
+		el empno,
+		el valor antiguo del salario,
+		el salario nuevo
+		y la fecha de modificación del registro.*/
+	
+	/*BLOQUE ANÓNIMO*/
+		CREATE TABLE EMPLOYEES_AUDIT( 
+			empno number(4,0),
+			msal_viejo number(6,2),
+			msal_nuevo number(6,2),
+			fecha DATE 
+		); 
+		
+	/*TRIGGER*/
+		create or replace TRIGGER TRIGGER1_EJ2 
+			BEFORE UPDATE OF MSAL ON EMPLOYEES 
+			FOR EACH ROW
+		BEGIN 
+		  INSERT INTO EMPLOYEES_AUDIT VALUES(:OLD.empno, :OLD.msal, :NEW.msal, SYSDATE); 
+		END;

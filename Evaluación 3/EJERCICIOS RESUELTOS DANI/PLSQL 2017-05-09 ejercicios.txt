@@ -1,0 +1,128 @@
+﻿Ejerc_Cursores1.doc
+
+------------------------------------------------------------------------------
+9.	Crear un procedimiento que reciba un parámetro como porcentaje e incremente el salario de los empleados cuyo salario es superior a la media de salarios de la empresa.
+
+
+	create or replace PROCEDURE CURSORES_09
+	(
+		vPorcentaje IN NUMBER(4),
+	
+	  CURSOR cursorEmp IS
+		select msal
+		from employees
+		where msal >
+		(select avg(msal)
+		from employees);
+	 ) AS 
+	BEGIN
+		FOR v_regEmp IN cursorEmp LOOP
+			UPDATE employees SET msal = msal + (msal*vPorcentaje);
+			WHERE CURRENT OF cursorEmp;
+		END LOOP;
+	END CURSORES_09;
+
+
+------------------------------------------------------------------------------
+10.	Crear un procedimiento que reciba el número de empleado por parámetro y, si es jefe, muestre los cursos a los que ha asistido (código de curso, fecha y localización).
+
+	create or replace PROCEDURE CURSORES_10
+	(
+   		vEmpno IN employees.empno%type,
+    
+	  CURSOR cursorEmp IS
+		select e.empno, r.course, r.begindate, o.location
+		from employees e
+		join registrations r
+		on (e.empno=r.attendee)
+		join offerings o
+		on (r.course=o.course)
+		where empno=vEmpno AND empno in(
+			select mgr
+			from employees);
+	 ) AS 
+	BEGIN
+		FOR v_regEmp IN cursorEmp LOOP
+    		  DBMS_OUTPUT.PUT_LINE(v_regEmp.empno||','||v_regEmp.course||','||v_regEmp.begindate||','||v_regEmp.location);
+		END LOOP;
+	END CURSORES_10;
+
+
+------------------------------------------------------------------------------
+11.	Crear un procedimiento que reciba por parámetro el código de un curso y me muestre en qué localidades se ha impartido y nombre de los trainer que lo han impartido.
+
+	create or replace PROCEDURE CURSORES_11
+	(
+   		vCourse IN offerings.course%type :=&v,
+    
+	  CURSOR cursorEmp IS
+		select o.location, e.ename
+		from offerings o
+		join employees e
+		on (o.trainer=e.empno)
+		where o.course=vCourse;
+	 ) AS 
+	BEGIN
+		FOR v_regEmp IN cursorEmp LOOP
+    		  DBMS_OUTPUT.PUT_LINE(v_regEmp.location||','||v_regEmp.ename);
+		END LOOP;
+	END CURSORES_11;
+------------------------------------------------------------------------------
+12.	Realizar una función que reciba como parámetro el número de un empleado y devuelva lo que ha ganado en el último año. Desde un procedimiento, usando dicha función, se sacarán todos los empleados que hayan ganado más que el empleado en el último año.
+
+	create or replace FUNCTION CURSORES_12_F
+	(
+		vEmpno IN employees.empno%type,
+	  CURSOR cursorEmp IS
+		select (msal*12)+comm
+		from employees
+		where empno=vEmpno;
+	 )
+	RETURN varchar2
+	AS
+		v_ganancias number;
+	BEGIN
+		FOR v_regEmp IN cursorEmp LOOP
+		END LOOP;
+		RETURN v_ganancias;
+	END CURSORES_12_F;
+	
+	
+	
+	create or replace PROCEDURE CURSORES_12_P
+	(
+   		vEmpno IN employees.empno%type :=&v,
+    
+	  CURSOR cursorEmp IS
+		select *
+		from employees
+		where (msal*12)+comm > CURSORES_12_F(vEmpno);
+	 ) AS 
+	BEGIN
+		FOR v_regEmp IN cursorEmp LOOP
+    		  DBMS_OUTPUT.PUT_LINE(v_regEmp.empno||','||v_regEmp.msal);
+		END LOOP;
+	END CURSORES_12_P;
+
+
+------------------------------------------------------------------------------
+13.	Realizar un procedimiento que reciba como parámetro un salario mínimo y un salario máximo. Sacar la categoría o grado correspondiente a ese intervalo de salario y modificar los empleados que están dentro de esa categoría de sueldo aumentando su sueldo en 100 €.
+
+
+	create or replace PROCEDURE CURSORES_13
+	(
+   		vMin_msal IN employees.msal%type :=&v,
+		vMax_msal IN employees.msal%type :=&v,
+
+	  CURSOR cursorEmp IS
+		select *
+		from employees
+		where msal between vMin_msal and vMax_msal;
+	 ) AS 
+	BEGIN
+		FOR v_regEmp IN cursorEmp LOOP
+			UPDATE employees SET msal = msal +100;
+			WHERE CURRENT OF cursorEmp;
+		END LOOP;
+	END CURSORES_13;
+

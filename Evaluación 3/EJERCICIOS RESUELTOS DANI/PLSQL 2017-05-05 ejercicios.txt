@@ -1,0 +1,94 @@
+Ejerc_Cursores1.doc -> 1, 2, 3 (con LOOP, no con FOR), 4 (con FOR), 5
+
+------------------------------------------------------------------------------
+1. Definir un registro con los siguientes campos (usando TYPE):
+nombre empleado, nombre departamento, salario, trabajo y localidad del departamento.
+------------------------------------------------------------------------------
+	TYPE regEmpleado IS RECORD (
+		ename employees.ename&TYPE;
+		dname departments.dname&TYPE;
+		msal employees.msal&TYPE;
+		job employees.job&TYPE;
+		location departments.location&TYPE;
+	)
+
+------------------------------------------------------------------------------
+2. Definir otro registro con los campos de la tabla employees  (usando %ROWTYPE)
+------------------------------------------------------------------------------
+	regEmployees employees%ROWTYPE;
+	
+------------------------------------------------------------------------------
+3. Declarar un cursor cursorEmpDept que contenga los datos del ejercicio 1 y hacer una variable de registro para dicho cursor.
+Mostrar el contenido utilizando esa variable de registro.
+------------------------------------------------------------------------------
+	SET SERVEROUTPUT ON
+	DECLARE
+		CURSOR cursorEmpDept IS
+			select e.ename, d.dname, e.msal, e.job, d.location
+			from employees e
+			join departments d
+			on (e.deptno=d.deptno);
+		regEmpleado cursorEmpDept%ROWTYPE;
+	BEGIN
+		OPEN cursorEmpDept;
+		LOOP
+			FETCH cursorEmpDept INTO regEmpleado;
+			EXIT WHEN cursorEmpDept%NOTFOUND;
+			DBMS_OUTPUT.PUT_LINE(
+				regEmpleado.ename||','||
+				regEmpleado.dname||','||
+				regEmpleado.msal||','||
+				regEmpleado.job||','||
+				regEmpleado.location);
+		END LOOP;
+		
+		CLOSE cursorEmpDept;
+	END;
+
+------------------------------------------------------------------------------	
+4. Realizar el ejercicio 3 con un bucle FOR
+------------------------------------------------------------------------------
+	SET SERVEROUTPUT ON
+	DECLARE
+		CURSOR cursorEmpDept IS
+			select e.ename, d.dname, e.msal, e.job, d.location
+			from employees e
+			join departments d
+			on (e.deptno=d.deptno);
+
+	BEGIN
+		FOR regEmpleado IN cursorEmpDept LOOP
+			DBMS_OUTPUT.PUT_LINE(
+				regEmpleado.ename||','||
+				regEmpleado.dname||','||
+				regEmpleado.msal||','||
+				regEmpleado.job||','||
+				regEmpleado.location);
+		END LOOP;
+	END;
+	
+------------------------------------------------------------------------------
+5. Realizar un programa que sólo muestre los datos de los empleados para aquellos
+que pertenezcan a un departamento que se introducirá por el usuario por teclado.
+------------------------------------------------------------------------------
+SET SERVEROUTPUT ON
+	DECLARE
+		vDeptno VARCHAR2(2):=&v;
+		CURSOR empleados IS
+			select *
+			from employees
+			where deptno=vDeptno;
+	BEGIN
+		FOR regEmpleado IN empleados LOOP
+			DBMS_OUTPUT.PUT_LINE(
+				regEmpleado.empno||','||
+				regEmpleado.ename||','||
+				regEmpleado.init||','||
+				regEmpleado.job||','||
+				regEmpleado.mgr||','||
+				regEmpleado.bdate||','||
+				regEmpleado.msal||','||
+				regEmpleado.comm||','||
+				regEmpleado.deptno);
+		END LOOP;
+	END;

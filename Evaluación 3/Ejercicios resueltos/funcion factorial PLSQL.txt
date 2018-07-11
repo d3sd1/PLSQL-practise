@@ -1,0 +1,10 @@
+CREATE OR REPLACE FUNCTION fctorial (n IN number)
+RETURN number
+AS
+BEGIN 
+	IF n<=1 THEN
+		RETURN 1;
+	ELSE
+		RETURN n*factorial(n-1);
+	END IF;
+END;

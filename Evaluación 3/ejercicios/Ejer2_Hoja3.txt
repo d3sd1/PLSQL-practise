@@ -1,0 +1,35 @@
+CREATE OR REPLACE PROCEDURE EJER2
+(
+  NUM_DEP IN NUMBER 
+)
+AS 
+CURSOR c1 IS
+    SELECT e.ename, e.msal FROM employees e;
+vMediaSalario employees.msal%type;
+BEGIN
+    vMediaSalario := EJER2_MEDIA(NUM_DEP);
+    DBMS_OUTPUT.PUT_LINE('Salario medio de la empresa: ' || vMediaSalario || '€.');
+  FOR reg1 IN c1 LOOP
+    IF reg1.msal < vMediaSalario THEN
+        DBMS_OUTPUT.PUT_LINE('El empleado ' || reg1.ename || ' tiene un sueldo inferior a la media (' || reg1.msal || '€).');
+    ELSE
+        DBMS_OUTPUT.PUT_LINE('El empleado ' || reg1.ename || ' tiene un sueldo igual o superior a la media (' || reg1.msal || '€).');
+    END IF;
+  END LOOP;
+END EJER2;
+------------------
+create or replace FUNCTION EJER2_MEDIA
+(
+  NUM_DEP IN NUMBER 
+) RETURN employees.msal%type AS
+vMedia employees.msal%type;
+BEGIN
+  SELECT AVG(msal) INTO vMedia FROM employees WHERE deptno=NUM_DEP;
+  RETURN vMedia;
+END EJER2_MEDIA;
+------------------
+DECLARE
+
+BEGIN
+EJER2(20);
+END;

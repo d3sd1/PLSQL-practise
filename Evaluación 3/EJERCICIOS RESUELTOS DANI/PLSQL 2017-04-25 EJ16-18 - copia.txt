@@ -1,0 +1,107 @@
+﻿16.	Codificar un procedimiento que permita borrar un empleado cuyo número se pasará en la llamada.
+	---BLOQUE ANÓNIMO---
+	SET SERVEROUTPUT ON;
+	BEGIN
+	  EJ16(7369); --Borrar Smith
+	END;
+	
+	---PROCEDIMIENTO EJ16---
+	CREATE OR REPLACE PROCEDURE EJ16 
+	(
+		P_EMPNO IN NUMBER 
+	) AS 
+	BEGIN
+    EXECUTE IMMEDIATE 'ALTER TABLE offerings DISABLE CONSTRAINT O_TRAIN_FK';
+		DELETE FROM employees
+		WHERE empno=P_EMPNO;
+    EXECUTE IMMEDIATE 'ROLLBACK';
+    EXECUTE IMMEDIATE 'ALTER TABLE offerings ENABLE CONSTRAINT O_TRAIN_FK';
+	END EJ16;
+	
+	--RESULTADO DE BLOQUE ANÓNIMO---
+	(No me deja borrarlo porque da un error debido a una restricción (O_TRAIN_FK) que habría que desactivar primero. Probé a poner "ALTER TABLE employees DISABLE CONSTAINT O_TRAIN_FK;" en el procedimiento pero daba error al compilar.)
+	
+		Informe de error -
+		ORA-02292: restricción de integridad (CLASE.O_TRAIN_FK) violada - registro secundario encontrado
+		ORA-06512: en "CLASE.EJ16", línea 6
+		ORA-06512: en línea 2
+		02292. 00000 - "integrity constraint (%s.%s) violated - child record found"
+		*Cause:    attempted to delete a parent key value that had a foreign
+				   dependency.
+		*Action:   delete dependencies first then parent or disable constraint.
+
+	
+
+17.	Escribir un procedimiento que modifique la localidad de un departamento. El procedimiento recibirá como parámetros el número del departamento y la localidad nueva.
+
+	---BLOQUE ANÓNIMO---
+	SET SERVEROUTPUT ON;
+	BEGIN
+	  EJ17(10, 'MADRID');	--original era 'NEW YORK'
+	END;
+	
+	---PROCEDIMIENTO EJ17---
+	CREATE OR REPLACE PROCEDURE EJ17 
+	(
+	  P_DEPARTAMENTO IN NUMBER 
+	, P_LOCALIDAD IN VARCHAR2 
+	) AS 
+	BEGIN
+	  UPDATE departments SET location=p_localidad
+	  WHERE deptno=p_departamento;
+	END EJ17;
+	
+	--RESULTADO DE BLOQUE ANÓNIMO---
+	(El parámetro LOCATION del departamento 10 pasa de 'NEW YORK' a 'MADRID')
+	
+	/*
+		El bloque anónimo envía un DEPTNO y una nueva "LOCATION" al procedimiento.
+		El procedimiento va a EDITAR la tabla DEPARTMENTS, de tal modo que en la fila LOCATION le va a poner el segundo parámetro. Siempre y cuando el DEPTNO sea el del primer parámetro.
+		Es decir, le estás diciendo que te edite la localidad del departamento que le has especificado.
+		Va a mirar los departamentos, y cuando encuentre el departamento 10, ahí en lugar de poner "NEW YORK" va a poner lo que le hayas puesto ('MADRID')
+	*/
+
+	
+18.	Crear un procedimiento que reciba como parámetros el número de un empleado y, por referencia, se le pase un parámetro de tipo localidad del departamento del empleado. En la llamada ese parámetro irá sin valor. El procedimiento recogerá la localidad del departamento si la tuviere. En un bloque anónimo, llamaremos al procedimiento y evaluaremos dicha localidad, si tiene valor, lo sacaremos por pantalla, si no tiene nada, diremos que está vacío.
+
+	---BLOQUE ANÓNIMO---
+	SET SERVEROUTPUT ON;
+	DECLARE
+	  V_LOCALIDAD VARCHAR2(50);
+	BEGIN
+	  EJ18(7369, V_LOCALIDAD);
+	  DBMS_OUTPUT.PUT_LINE(V_LOCALIDAD);
+	END;
+	
+	---PROCEDIMIENTO EJ18---
+	CREATE OR REPLACE PROCEDURE EJ18
+	(
+	  P_EMPNO IN NUMBER 
+	, P_LOCALIDAD OUT VARCHAR2 
+	) AS 
+	BEGIN
+	  select d.location
+	  into P_LOCALIDAD
+	  from departments d
+	  join employees e
+	  on d.deptno=e.deptno
+	  where e.empno=P_EMPNO;
+	END EJ18;
+	
+	
+	--RESULTADO DE BLOQUE ANÓNIMO---
+	DALLAS
+	
+	(Muestra la localidad del departamento 20, que es el departamento donde trabaja el empleado 7369, Smith)
+	
+	/*
+		En el bloque anónimo declaras una variable vacía (V_LOCALIDAD). Esto es como una especie de comodín vacío que usaremos luego.
+		Luego llamas al procedimiento enviándole un número de empleado válido y el "comodín" que es donde luego se almacenará la información que quieres mostrar por pantalla.
+		
+		En el procedimiento, en el segundo parámetro lo definimos como OUT (que va a recibir el puntero de la variable vacía del bloque anónimo).
+		Esto básicamente sirve para hacer una especie de return usando procedimientos, que NO tienen return.
+		
+		Entonces modificamos P_LOCALIDAD a nuestro gusto, y cuando el procedimiento termine, en nuestro bloque anónimo, esos cambios se verán reflejados en V_LOCALIDAD.
+		
+		¿Y cómo hemos cambiado P_LOCALIDAD? Hemos hecho una select con una join que mira en qué departamento trabaja el empleado con ese EMPNO, y luego miramos la LOCATION de ese departamento. Y el resultado de esa select lo almacenamos en P_LOCALIDAD que a su vez luego se almacenará en V_LOCALIDAD. Y eso en el bloque anónimo basta con imprimir por pantalla V_LOCALIDAD para mostrar el resultado final.		
+	*/

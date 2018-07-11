@@ -1,0 +1,23 @@
+create or replace PROCEDURE CURSORES_13
+	(
+   		vMin_msal IN employees.msal%type,
+    	vMax_msal IN employees.msal%type
+	 ) AS 
+	 CURSOR cursorEmp IS
+		select e.msal
+		from employees e
+		join salgrades s
+		on (e.msal between s.lowerlimit and s.upperlimit)
+		where (s.lowerlimit<=vMin_msal and s.upperlimit>=vMax_msal)
+    FOR UPDATE OF e.msal NOWAIT;
+					
+	BEGIN
+		FOR v_regEmp IN cursorEmp LOOP
+			UPDATE employees SET msal = msal+100
+			WHERE CURRENT OF cursorEmp;
+		END LOOP;
+    
+  EXCEPTION
+    WHEN OTHERS THEN
+      DBMS_OUTPUT.PUT_LINE('Error desconocido');
+END CURSORES_13;

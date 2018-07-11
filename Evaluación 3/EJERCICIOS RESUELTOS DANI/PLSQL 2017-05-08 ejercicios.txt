@@ -1,0 +1,208 @@
+Ejerc_Cursores1.doc
+	
+------------------------------------------------------------------------------
+5. Realizar un programa que sólo muestre los datos de los empleados para aquellos
+que pertenezcan a un departamento que se introducirá por el usuario por teclado.
+
+(CURSOR CON PARÁMETRO)
+------------------------------------------------------------------------------
+SET SERVEROUTPUT ON
+	DECLARE
+		vDeptno VARCHAR2(2):=&v;
+		CURSOR cursorEmp(p_numdep departments.deptno%TYPE) IS
+			SELECT *
+			FROM employees
+			WHERE deptno=p_numdep;
+	BEGIN
+		FOR v_regEmp IN cursorEmp(vDeptno) LOOP
+			DBMS_OUTPUT.PUT_LINE(
+				v_regEmp.empno||','||
+				v_regEmp.ename||','||
+				v_regEmp.init||','||
+				v_regEmp.job||','||
+				v_regEmp.mgr||','||
+				v_regEmp.bdate||','||
+				v_regEmp.msal||','||
+				v_regEmp.comm||','||
+				v_regEmp.deptno);
+		END LOOP;
+	END;
+	
+	
+	
+	
+------------------------------------------------------------------------------
+(Lo he metido en un bucle para que me muestre los empleados del 10, 20, 30 y 40)
+
+SET SERVEROUTPUT ON
+	DECLARE
+		vDeptno VARCHAR2(2):=10;
+		CURSOR cursorEmp(p_numdep departments.deptno%TYPE) IS
+			SELECT *
+			FROM employees
+			WHERE deptno=p_numdep;
+	BEGIN
+		LOOP 
+		  DBMS_OUTPUT.PUT_LINE('DEPT: '||vDeptno);
+			FOR v_regEmp IN cursorEmp(vDeptno) LOOP
+			  DBMS_OUTPUT.PUT_LINE(
+				v_regEmp.empno||','||
+				v_regEmp.ename||','||
+				v_regEmp.init||','||
+				v_regEmp.job||','||
+				v_regEmp.mgr||','||
+				v_regEmp.bdate||','||
+				v_regEmp.msal||','||
+				v_regEmp.comm||','||
+				v_regEmp.deptno);
+			END LOOP;
+		  EXIT WHEN vDeptno=40; 
+		  vDeptno:=vDeptno+10; 
+		  DBMS_OUTPUT.PUT_LINE('----------');
+		END LOOP; 
+	END;
+	
+------------------------------------------------------------------------------
+
+
+
+EJERCICIOS 6, 7, 8, 9, 10, 11, 12, 13, TODOS
+
+------------------------------------------------------------------------------
+6.	Aumentar un 10% el salario de los empleados que ganan menos de 1650.
+	DECLARE
+		CURSOR cursorEmp IS
+			SELECT *
+			FROM employees;
+	BEGIN
+		FOR v_regEmp IN cursorEmp LOOP 
+			IF v_regEmp.msal<1650 THEN 
+				UPDATE employees SET msal = msal *1.10
+				WHERE CURRENT OF cursorEmp;
+		END LOOP;
+	END;
+
+------------------------------------------------------------------------------
+7.	Crear un procedimiento o bloque que recorra los empleados en un cursor, por cada empleado vea su grado salarial y si está por debajo de grado 4, actualice
+su salario en 500, si está por encima de grado 4 en 1000
+
+	DECLARE
+		CURSOR cursorEmp IS
+			select e.ename, e.msal, s.grade
+			from employees e
+			join salgrades s
+			on (e.msal between s.lowerlimit and s.upperlimit);
+	BEGIN
+		FOR v_regEmp IN cursorEmp LOOP
+			IF v_regEmp.grade<4 THEN 
+				UPDATE employees SET msal = msal +500
+				WHERE CURRENT OF cursorEmp;
+			ELSE IF v_regEmp.grade>4 THEN 
+				UPDATE employees SET msal = msal +1000
+				WHERE CURRENT OF cursorEmp;
+			END IF;
+		END LOOP;
+	END;
+
+------------------------------------------------------------------------------
+8.	Procedimiento para actualizar  el salario en 100€  a los empleados del departamento ventas si su grado salarial es superior a 2 usando una única query  (un solo cursor) y sin bloquear la tabla  departamentos
+
+
+
+	create or replace PROCEDURE CURSORES_08 
+	(
+	  CURSOR cursorEmp IS
+		select e.ename, e.msal, s.grade, d.deptno
+		from employees e
+		join salgrades s
+		on (e.msal between s.lowerlimit and s.upperlimit)
+		join departments d
+		on (e.deptno=d.deptno)
+		where lower(d.dname)='sales';
+	 ) AS 
+	BEGIN
+		FOR v_regEmp IN cursorEmp LOOP
+			IF v_regEmp.grade<2 THEN 
+				UPDATE employees SET msal = msal +1000
+				WHERE CURRENT OF cursorEmp;
+			END IF;
+		END LOOP;
+	END CURSORES_08;
+
+
+------------------------------------------------------------------------------
+9.	Crear un procedimiento que reciba un parámetro como porcentaje e incremente el salario de los empleados cuyo salario es superior a la media de salarios de la empresa.
+
+
+	create or replace PROCEDURE CURSORES_09
+	(
+		PORCENTAJE OUT NUMBER(4);
+	
+	  CURSOR cursorEmp IS
+		select msal
+		from employees
+		group by msal;
+--MAL
+	 ) AS 
+	BEGIN
+		FOR v_regEmp IN cursorEmp LOOP
+			IF v_regEmp.msal>avg(msal) THEN 
+				UPDATE employees SET msal = msal +msal*PORCENTAJE;
+				WHERE CURRENT OF cursorEmp;
+			END IF;
+		END LOOP;
+	END CURSORES_09;
+
+
+------------------------------------------------------------------------------
+10.	Crear un procedimiento que reciba el número de empleado por parámetro y, si es jefe, muestre los cursos a los que ha asistido (código de curso, fecha y localización).
+
+------------------------------------------------------------------------------
+11.	Crear un procedimiento que reciba por parámetro el código de un curso y me muestre en qué localidades se ha impartido y nombre de los trainer que lo han impartido.
+
+------------------------------------------------------------------------------
+12.	Realizar una función que reciba como parámetro el número de un empleado y devuelva lo que ha ganado en el último año. Desde un procedimiento, usando dicha función, se sacarán todos los empleados que hayan ganado más que el empleado en el último año.
+
+------------------------------------------------------------------------------
+13.	Realizar un procedimiento que reciba como parámetro un salario mínimo y un salario máximo. Sacar la categoría o grado correspondiente a ese intervalo de salario y modificar los empleados que están dentro de esa categoría de sueldo aumentando su sueldo en 100 €.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,22 @@
+13.	Realizar un procedimiento que reciba como parámetro un salario mínimo y un salario máximo.
+Sacar la categoría o grado correspondiente a ese intervalo de salario y modificar los empleados que están dentro de esa categoría de sueldo aumentando su sueldo en 100 €.
+
+
+	create or replace PROCEDURE CURSORES_13
+	(
+   		vMin_msal IN employees.msal%type :=&v,
+		vMax_msal IN employees.msal%type :=&v,
+	 ) AS 
+	 CURSOR cursorEmp IS
+		select e.name, e.msal, s.grade
+		from employees e
+		join salgrades s
+		on (e.msal) between s.lowerlimit, s.upperlimit
+		where (s.lowerlimit<=vMin_msal and s.upperlimit>=vMax_msal);			
+					
+	BEGIN
+		FOR v_regEmp IN cursorEmp LOOP
+			UPDATE employees SET msal = msal +100;
+			WHERE CURRENT OF cursorEmp;
+		END LOOP;
+	END CURSORES_13;

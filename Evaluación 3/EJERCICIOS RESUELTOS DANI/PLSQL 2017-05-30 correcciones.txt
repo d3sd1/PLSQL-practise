@@ -1,0 +1,79 @@
+PLSQL 2017-05-30 correcciones
+
+PLSQL3 EJ2
+	-----------------------------------------PROCEDURE-------------------------------------------------
+
+	CREATE OR REPLACE FUNCTION Media (numDep employees.deptno&type)
+	RETURN number AS
+		vSalarioMedio number(10,2);
+
+	BEGIN
+		select avg(msal) into vSalarioMedio
+		from employees
+		where depno=numDep
+		group by depno; --no hace falta
+		RETURN vSalarioMedio
+	EXCEPTION
+		WHEN NO_DATA_FOUND THEN
+			DBMS_OUTPUT.PUT_LINE('Valor no encontrado');
+	END;
+
+	-------------------------------------------FUNCTION-----------------------------------------------
+	
+	CREATE OR REPLACE PROCEDURE EJ2 (numDep employees.depno%type)
+	AS
+		cursor c1 is
+			select empno, ename, msal
+			from employees
+			where msal>vSal;
+		vSal number;
+		
+	BEGIN
+		vSal=Media(numDep);
+		for r1 in c1 loop
+			if r1.msal>vSal then
+				DBMS_OUTPUT.PUT_LINE('empno '||r1.empno||' ename '||r1.ename||' msal '||r1.msal||);
+			end if;
+		end loop;
+	END;
+	
+	
+------------------------------------------------------------------------------------------
+PLSQL3 EJ3
+	
+	CREATE OR REPLACE PROCEDURE EJ3 () AS
+		CURSOR C1 IS
+			select distinct d.deptno, d.location
+			from departments d
+			join offerings o
+			on d.location=o.location
+			for UPDATE of location NOWAIT;
+		
+		CURSOR C2 IS
+			select distinct location
+			from departments
+			where location not in (
+				select location
+				from offerings)
+			for UPDATE of location NOWAIT;
+		
+		e_tamanoGrande EXCEPTION:
+		PRAGMA EXCEPTION_INIT(e_tamanoGrande,-12899)
+		
+	BEGIN
+		for r1 in c1 loop
+			update departments set location=location||'/si'
+			when current of c1;	
+		end loop;
+		
+		for r2 in c2 loop
+			update departments set location=location||'/no'
+			when current of c2;	
+		end loop;
+	EXCEPTION
+		WHEN e_tamanoGrande THEN
+			DBMS_OUTPUT.PUT_LINE('No se puede añadir porque excede el tamaño máximo del campo');
+	END;
+	
+------------------------------------------------------------------------------------------
+PLSQL3 EJ4

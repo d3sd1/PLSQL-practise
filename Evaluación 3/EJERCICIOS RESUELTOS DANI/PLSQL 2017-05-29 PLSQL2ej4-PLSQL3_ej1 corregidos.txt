@@ -1,0 +1,71 @@
+PLSQL2_EJ4
+
+4.
+CREATE OR REPLACE PROCEDURE H2Ej4 (numdep departments.deptno%type) AS
+	e_integridad EXCEPTION;
+	PRAGMA EXCEPTION_INIT(e.integridad,-02292);
+BEGIN
+	delete from departments where deptno=numdep;
+EXCEPTION
+	when e_integridad then
+		DBMS_OUTPUT.PUT_LINE('Departamento referenciado en otras tablas');
+END;
+
+
+--------------------------------------------------------------
+PLSQL3
+
+1.
+	PROCEDIMIENTO
+
+		CREATE OR REPLACE PROCEDURE HOJA3EJ1 (
+			numEmp employees.empno%type,
+			numDep employees.deptno%type
+		) AS
+			v_nombre departments.dname%type;
+			v_media number(10,2) := 0;
+			
+			CURSOR C1 IS
+				select e.ename, d.dname
+				from employees e
+				join departaments d
+				on e.deptno=d.deptno;
+		BEGIN
+			select d.dname
+			into v_nombre
+			from employees e
+			join departments d
+			on (e.deptno=d.deptno)
+			where empno=numEmp
+			and deptno=numDep;
+			
+			v_media:=media(numDep);
+			DBMS_OUTPUT.PUT_LINE('La media del departamento '||v_nombre||' es: '||v_media);
+			
+		EXCEPTION
+			WHEN NO_DATA_FOUND THEN		--Esto puede saltar tanto porque el departamento no coincide o porque el EMPLEADO no existe, pero aquí damos por hecho SÓLO que es porque el dpto no coincide
+				for reg1 in c1 loop
+					DBMS_OUTPUT.PUT_LINE('Nombre emp: '||reg1.ename||' Nombre dept:'||reg1.dname);
+				end loop;
+			WHEN OTHERS THEN
+			  DBMS_OUTPUT.PUT_LINE('Error inesperado');
+		END;
+
+
+	FUNCIÓN
+
+		CREATE OR REPLACE FUNCTION media (
+			numDep employees.deptno%type
+		)
+		RETURN number AS
+			v_media number(10,2):=0;
+		BEGIN
+			select avg(msal) into v_media
+			from employees
+			where deptno=numDep
+			group by deptno;
+			return v_media;
+		END;
+		
+--------------------------------------------------------------
+

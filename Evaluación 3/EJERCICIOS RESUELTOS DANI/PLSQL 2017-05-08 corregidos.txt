@@ -1,0 +1,59 @@
+PLSQL CORREGIDOS Ejerc_Cursores1.doc
+08/05/2017
+------------------------------------------------------------------------------	
+1.
+	TYPE regEmp IS RECORD (
+		nombre employees.ename%type;
+		nombre_dept departments.dname%type;
+		salario employees.msal%type;
+		(...)
+	)
+------------------------------------------------------------------------------	
+2.
+	regEmpleado employees%ROWTYPE;
+------------------------------------------------------------------------------	
+3.
+	DECLARE
+		CURSOR cursorEmpleado IS
+			select e.ename, d.dname, e.msal, e.job, d.location
+			from employees e
+			join departments d
+			on (e.deptno=d.deptno);
+		v_cursorEmp cursorEmpleado%ROWTYPE;
+	BEGIN
+		OPEN cursorEmpleado;
+		LOOP
+			FETCH cursorEmpleado INTO v_cursorEmp;
+			EXIT WHEN cursorEmpleado%NOTFOUND;
+			DBMS_OUTPUT.PUT_LINE(v_cursorEmp.ename||'-'||v_cursorEmp.dname||'-'||...)
+		END LOOP;
+		
+		CLOSE cursorEmpleado;
+	END;
+------------------------------------------------------------------------------	
+4.
+	DECLARE
+		CURSOR cursorEmpleado IS
+			select e.ename, d.dname, e.msal, e.job, d.location
+			from employees e
+			join departments d
+			on (e.deptno=d.deptno);
+	BEGIN
+		FOR v_cursorEmp IN cursorEmpleado LOOP
+			DBMS_OUTPUT.PUT_LINE(v_cursorEmp.ename||'-'||v_cursorEmp.dname||'-'||...)
+		END LOOP;
+	END;
+------------------------------------------------------------------------------
+5.
+	DECLARE
+		vdeptno departments.deptno%type:=&v;
+		CURSOR cursorEmp IS
+			SELECT ename, msla, job, bdate
+			FROM employees
+			WHERE deptno=vdeptno;
+	BEGIN
+		FOR vdeptno IN cursorEmp LOOP
+			DBMS_OUTPUT.PUT_LINE(...);
+		END LOOP;
+	END;
+------------------------------------------------------------------------------

@@ -1,0 +1,4 @@
+abrir cmd como admin
+CMD > cd C:/crea_tablas
+CMD > sqlplus "/ as SYSDBA"
+SQL > @creschema

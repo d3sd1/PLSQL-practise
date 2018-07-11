@@ -1,0 +1,80 @@
+Ejercicio 11
+	---------ANÓNIMO-----------
+	SET SERVEROUTPUT ON;
+	BEGIN
+	DBMS_OUTPUT.PUT_LINE(Ej11('25/10/1990','17/08/1980'));
+	END;
+
+
+	---------EJ11-------
+	CREATE OR REPLACE FUNCTION EJ11 
+	(
+	  P_FECHA1 IN DATE 
+	, P_FECHA2 IN DATE 
+	) RETURN NUMBER AS 
+	BEGIN
+	  RETURN (TRUNC(MONTHS_BETWEEN(P_FECHA1, P_FECHA2)/12));
+	END EJ11;
+	
+	
+Ejercicio 12
+	---------ANÓNIMO-----------
+	SET SERVEROUTPUT ON;
+	BEGIN
+	DBMS_OUTPUT.PUT_LINE(Ej12('25/10/1990','17/08/1980'));
+	END;
+	
+	---------EJ12-------
+	CREATE OR REPLACE FUNCTION EJ12 
+	(
+	  P_FECHA1 IN DATE,
+	  P_FECHA2 IN DATE
+	) RETURN NUMBER AS 
+	BEGIN
+	  RETURN (TRUNC(EJ11(P_FECHA1,P_FECHA2)/3));
+	END EJ12;
+	
+	
+	
+Ejercicio 13
+	---------ANÓNIMO-----------
+	SET SERVEROUTPUT ON;
+	DECLARE
+		V_SUMA NUMBER(6);
+	BEGIN
+		Ej13(1,5,76,4,3, V_SUMA);
+		DBMS_OUTPUT.PUT_LINE(V_SUMA);
+	END;
+	
+	---------EJ13-------
+	CREATE OR REPLACE PROCEDURE EJ13 
+	(
+	  P_NUM1 IN NUMBER 
+	, P_NUM2 IN NUMBER 
+	, P_NUM3 IN NUMBER 
+	, P_NUM4 IN NUMBER 
+	, P_NUM5 IN NUMBER 
+	, SUMA OUT NUMBER 
+	) AS 
+	BEGIN
+	  SUMA:=P_NUM1+P_NUM2+P_NUM3+P_NUM4+P_NUM5;
+	END EJ13;
+	
+	
+	
+Ejercicio 14
+	---------ANÓNIMO-----------
+	SET SERVEROUTPUT ON;
+	BEGIN
+	  DBMS_OUTPUT.PUT_LINE(Ej14('¡Estoy(eliminando5todos?aquellos_caracteres@que%no9sean<letras!'));
+	END;
+	
+	
+	---------EJ14-------
+	CREATE OR REPLACE FUNCTION EJ14 
+	(
+	  P_CADENA IN VARCHAR2 
+	) RETURN VARCHAR2 AS 
+	BEGIN
+	  RETURN TRANSLATE(P_CADENA,'1234567890ª!"·$%&/()=?¿\|@#~€¬^*¨Ç;:_[]{}`+´ç,.-<>¡','                                                   ');
+	END EJ14;

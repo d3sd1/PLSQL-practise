@@ -1,0 +1,79 @@
+Ejercicio 11
+
+CREATE OR REPLACE PROCEDURE EJE_11 (codCurso courses.code%type) AS
+		cursor c1 is
+			select o.location, o.trainer, e.ename
+			from offerings o
+			join employees e
+			on (o.trainer = e.empno)
+			where o.course = codCurso;
+			
+		vControl number:=0;
+	
+	BEGIN
+		for reg in c1 loop
+			dbms_output.put_line('Localidad: '||reg.location||...);
+			vControl:=1;
+		end loop;
+		
+		if vControl=0 then
+			DBMS_OUTPUT.PUT_LINE('No existe el curso');
+		end if:
+		
+	EXCEPTION
+		WHEN INVALID_CURSOR THEN
+			DBMS_OUTPUT.PUT_LINE('Operación ilegal');
+		WHEN OTHERS THEN
+			DBMS_OUTPUT.PUT_LINE('ERROR INESPERADO');
+	END;
+	
+	
+	
+-------------------------------------------------------------------------
+Ejercicio 12
+CREATE OR REPLACE FUNCTION EJER_12_F (numEmp employees.empno%type)
+	RETURN number AS
+		vsal number:=0;
+	BEGIN
+		select (msal*12) into vsal
+		from employees
+		where empno=numEmp;
+		DBMS_OUTPUT.PUT_LINE('Ha ganado ' ||vsal);
+		RETURN vsal;
+		
+	EXCEPTION
+		WHEN NO_DATA_FOUND then
+			DBMS_OUTPUT.PUT_LINE('No se ha encontrado el empleado');
+		WHEN OTHERS THEN
+			DBMS_OUTPUT.PUT_LINE('Error inesperado');
+	END;
+	
+
+CREATE OR REPLACE PROCEDURE EJER_12_P AS
+		CURSOR C1 IS
+			select empno, ename, msal
+			from employees;
+		vSalario number:=0;
+		vControl number:=0;
+	BEGIN
+		vSalario:=EJER_12_F(3199);	//poner un empno que exista
+		for reg in c1 loop
+			if ((reg.msal*12)>vSalario) then
+				DBMS_OUTPUT.PUT_LINE(reg.empno||' '||reg.ename||' '||reg.msal);
+				vControl:=1;
+			end if;	
+		end loop;
+		
+		if (vControl=0) then
+			dbms_output.put_line('No hay ningún empleado que gane más del que me has pasado');
+		end if;
+		
+-------------------------------------------------------------------------
+Ejercicio 13
+
+
+
+
+
+
+

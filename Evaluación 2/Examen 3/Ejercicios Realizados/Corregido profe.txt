@@ -1,0 +1,28 @@
+-----------------------------
+
+create table alumnos
+(
+idalumno number(4) constraint al_id_pk primary key,
+nombre varchar2(98) constrint al_nom_nn not null,
+apellidos varchar2(50) constrant al_apel_nn not null, 
+tlf varchar2(9),
+fechaNac date constraint al_fec_nn not null
+constraint al_fec_chk check(fechaNac>to_date('01-01-1970','dd-mm-YYY'));
+
+----------------------------
+DB:
+DUDA!!!
+CREATE TABLE profesor (idprof NUMBER(5), nombre VARCHAR(10) NOT NULL, apellidos VARCHAR(10) NOT NULL, sueldo NUMBER(5), id_asignatura NUMBER(5),
+CONSTRAINT pro_idp_pk PRIMARY KEY(idprof),
+CONSTRAINT pro_id__fk FOREIGN KEY(id_asignatura) REFERENCES asignaturas
+);
+
+ESA ESTÁ BIEN, PERO...
+CREATE TABLE profesor (idprof NUMBER(5), nombre VARCHAR(10) NOT NULL, apellidos VARCHAR(10) NOT NULL, sueldo NUMBER(5), id_asignatura NUMBER(5),
+CONSTRAINT pro_idp_pk PRIMARY KEY(idprof),
+CONSTRAINT pro_id__fk FOREIGN KEY(id_asignatura) REFERENCES asignaturas(idasig)
+);
+
+NO SE DEBERÍA REFERENCIAR AL CAMPO EN LUGAR DE A LA TABLA?
+
+SOLUCION: se pone tabla(campo) y no tabla.campo

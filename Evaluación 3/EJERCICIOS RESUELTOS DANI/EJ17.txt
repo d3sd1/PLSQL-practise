@@ -1,0 +1,41 @@
+﻿	CREATE OR REPLACE PROCEDURE EJ17 
+	(
+	  P_DEPARTAMENTO IN NUMBER 
+	, P_LOCALIDAD IN VARCHAR2 
+	)
+ AS 
+  P_LOCALIDAD_SELECT VARCHAR2(20);
+	BEGIN
+      SELECT location
+      INTO P_LOCALIDAD_SELECT
+      FROM departments
+      WHERE deptno=p_departamento;
+      
+      DBMS_OUTPUT.PUT_LINE('Localidad actual: '||P_LOCALIDAD_SELECT);
+  
+	  UPDATE departments SET location=p_localidad
+	  WHERE deptno=p_departamento;
+    
+      SELECT location
+      INTO P_LOCALIDAD_SELECT
+      FROM departments
+      WHERE deptno=p_departamento;
+      
+      DBMS_OUTPUT.PUT_LINE('Localidad actual: '||P_LOCALIDAD_SELECT);
+    
+    EXECUTE IMMEDIATE 'ROLLBACK';
+    
+      SELECT location
+      INTO P_LOCALIDAD_SELECT
+      FROM departments
+      WHERE deptno=p_departamento;
+      
+      DBMS_OUTPUT.PUT_LINE('Localidad actual: '||P_LOCALIDAD_SELECT);
+	END EJ17;
+
+
+
+bloque anónimo terminado
+Localidad actual: NEW YORK
+Localidad actual: MADRID
+Localidad actual: NEW YORK

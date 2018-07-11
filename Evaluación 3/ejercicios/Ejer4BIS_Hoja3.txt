@@ -1,0 +1,72 @@
+* DA EL ERROR: PLS-00201: el identificador 'ANDREI' se debe declarar PERO NO SE PORQUE.
+
+DECLARE
+vEmpno employees.empno%type := &empno;
+vEname employees.ename%type := &ename;
+vInit employees.init%type := &init;
+vJob employees.job%type := &job;
+vMgr employees.mgr%type := &mgr;
+vBdate employees.bdate%type := &bdate;
+vMsal employees.msal%type := &msal;
+vComm employees.comm%type := &comm;
+vDeptno employees.deptno%type := &deptno;
+BEGIN
+  EJER4_FUN1(vEmpno,vEname,vInit,vJob,vMgr,vBdate,vMsal,vComm,vDeptno);
+END;
+
+------
+
+CREATE OR REPLACE PROCEDURE EJER4_FUN1 
+(
+  vEmpno IN employees.empno%type,
+  vEname IN employees.ename%type,
+  vInit IN employees.init%type,
+  vJob IN employees.job%type,
+  vMgr IN employees.mgr%type,
+  vBdate IN employees.bdate%type,
+  vMsal IN employees.msal%type,
+  vComm IN employees.comm%type,
+  vDeptno IN employees.deptno%type
+) AS 
+eReglaViolada EXCEPTION;
+vEmpnoFinal employees.empno%type := vEmpno;
+PRAGMA EXCEPTION_INIT(eReglaViolada, -02290);
+BEGIN
+  EJER4_FUN2(vEmpnoFinal);
+      DBMS_OUTPUT.PUT_LINE('El empleado no existe. Por ende, procedemos a insertarlo: ');
+      INSERT INTO employees (empno,ename,init,job,mgr,bdate,msal,comm,deptno) VALUES (vEmpno,vEname,vInit,vJob,vMgr,vBdate,vMsal,vComm,vDeptno);
+      DBMS_OUTPUT.PUT_LINE('Se ha insertado al empleado correctamente.');
+      EXCEPTION
+        WHEN eReglaViolada THEN
+        DBMS_OUTPUT.PUT_LINE('Se ha producido un error al insertar el empleado, debido a que se ha violado una restricción.');
+        WHEN OTHERS THEN
+        DBMS_OUTPUT.PUT_LINE('Se ha producido un error al insertar el empleado.');
+END EJER4_FUN1;
+
+--------------------
+
+CREATE OR REPLACE PROCEDURE EJER4_FUN2 
+(
+  vEmpnoFinal OUT employees.empno%type
+) AS 
+vAuxiliar employees.empno%type;
+vExiste NUMBER(1) := -1;
+BEGIN
+  WHILE vExiste = 1 LOOP
+    BEGIN
+      SELECT empno INTO vAuxiliar FROM employees WHERE empno=vEmpnoFinal;
+      DBMS_OUTPUT.PUT_LINE('El empleado existe. Probaremos con otra ID...');
+      vEmpnoFinal := vEmpnoFinal+1; /* Existe, así que para el siguiente, probaremos con una ID superior. */
+      EXCEPTION
+        WHEN NO_DATA_FOUND THEN
+          /* No existe, así que no hay problema. Se usa el ID actual */
+          vExiste := 0;
+        WHEN TOO_MANY_ROWS THEN
+          DBMS_OUTPUT.PUT_LINE('El empleado existe. Probaremos con otra ID...');
+          vEmpnoFinal := vEmpnoFinal+1;
+        WHEN OTHERS THEN
+          /* No existe, así que no hay problema. Se usa el ID actual */
+          vExiste := 0;
+    END;
+  END LOOP;
+END EJER4_FUN2;

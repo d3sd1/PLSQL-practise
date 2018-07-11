@@ -1,0 +1,36 @@
+	/* EJERCICIO 10 CON EXCEPCIONES CORREGIDO 
+		10) Crear procedimiento que reciba el nº de empleado por parámetro y, si es jefe,
+		muestre los cursos a los que ha asistido (código de curso, de fecha, localización)
+	*/
+
+		CREATE OR REPLACE PROCEDURE CURSORES_10_CORREGIDO (
+			numemp IN employees.empno%type
+		) AS
+			CURSOR C1 IS
+				select r.course, r.begindate, o.location
+				from registrations r
+				join offerings o
+				on (r.course=o.course) and (r.begindate=o.begindate)
+				and r.attendee=numemp;
+			vcheck employees.mgr%type;   
+		BEGIN
+			--averiguo si es jefe
+				select distinct mgr into vcheck
+				from employees
+				where nvl(mgr,0)=numemp;
+			
+			/*
+			POSIBLES EXCEPCIONES
+				- No dé ningún resultado
+				- No sea jefe
+				- Sí sea jefe
+			*/
+			
+			for reg in C1 loop
+				DBMS_OUTPUT.PUT_LINE('Curso: '||reg.course||', Fecha: '||reg.begindate||', Localidad: '||reg.location);
+			end loop;
+			
+		EXCEPTION
+			WHEN NO_DATA_FOUND THEN
+				DBMS_OUTPUT.PUT_LINE('El número de empleado no existe o no es jefe');
+		END;

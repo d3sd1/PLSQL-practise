@@ -1,0 +1,55 @@
+EJEMPLO CURSOR CON REGISTROS
+
+DECLARE
+	CURSOR cursorProvincias IS
+		SELECT p.nombre, SUM(poblacion) AS poblacion
+		FROM LOCALIDADES I
+		JOIN PROVINCIAS p USING (n_provincia)
+		GROUP BY p.nombrE;
+	rProvincias cursorProvincias%ROWTYPE;
+BEGIN
+	OPEN cursorProvincias
+	LOOP
+		FETCH cursorProvincias INTO rProvincias
+		EXI WHEN cursorProvincias&NOTFOUND;
+		DBMS_OUTPUT.PUT_LINE(rProvincias.nombre || ',' || rProvincias.poblacion);
+	END LOOP;
+	CLOSE cursorProvincias
+END;
+
+
+------------------------------------------------------------------------
+Ejercicio: Mostrar empno, ename y msal del departamento 10
+SET SERVEROUTPUT ON
+DECLARE
+	CURSOR cursorEmpleados IS
+		SELECT empno, ename, msal
+		FROM employees
+		WHERE deptno=10;
+	regEmpleados cursorEmpleados%ROWTYPE;
+BEGIN
+	OPEN cursorEmpleados;
+	LOOP
+		FETCH cursorEmpleados INTO regEmpleados;
+		EXIT WHEN cursorEmpleados%NOTFOUND;
+		DBMS_OUTPUT.PUT_LINE(regEmpleados.empno||','||regEmpleados.ename||','||regEmpleados.msal);
+	END LOOP;
+	CLOSE cursorEmpleados;
+END;
+
+------------------------------------------------------------------------
+Con bucle for es mucho más sencillo, porque la declaración de registro, open, fetch y close van implícitos
+Ejercicio anterior con for:
+
+SET SERVEROUTPUT ON
+DECLARE
+	CURSOR cursorEmpleados IS
+		SELECT empno, ename, msal
+		FROM employees
+		WHERE deptno=10;
+BEGIN
+	FOR regEmpleados IN cursorEmpleados LOOP
+		DBMS_OUTPUT.PUT_LINE(regEmpleados.empno||','||regEmpleados.ename||','||regEmpleados.msal);
+	END LOOP;
+END;
+

@@ -1,0 +1,55 @@
+BLOQUE-----------------------
+
+SET SERVEROUTPUT ON;
+DECLARE
+	--v_empno employees.empno%type :=&v,
+	--v_ename employees.ename%type :=&v
+BEGIN
+  DBMS_OUTPUT.PUT_LINE('llamando a procedimiento');
+	--PLSQL3_EJ4(v_empno, v_ename);
+  --PLSQL3_EJ4(7369, 'pepe'); --código de smith
+  PLSQL3_EJ4(9999, 'pepe'); --código que no existe
+END;
+
+
+
+procedimiento1-----------------------
+
+create or replace PROCEDURE PLSQL3_EJ4 (
+  v_num employees.empno%type,	
+  v_nombre employees.ename%type
+) AS
+	v_existe number :=1;
+BEGIN
+	PLSQL3_EJ4_comprobar(v_num, v_existe);
+	
+	IF v_existe=0 THEN 
+		--RAISE_APPLICATION_ERROR(-20001,'No existe ese empleado'); 
+		-- añadir empleado a la tabla
+    DBMS_OUTPUT.PUT_LINE('alter employees add v_num, v_nombre, null, null, null, null (hasta 14)');
+    DBMS_OUTPUT.PUT_LINE('Voy a añadir el empleado '||v_num||' y se llama '||v_nombre);
+	else
+		--actualizar datos
+    DBMS_OUTPUT.PUT_LINE('update employees set empno where empno=v_num;');
+    DBMS_OUTPUT.PUT_LINE('Al empleado (que ya existía) '||v_num||' le voy a renombrar a '||v_nombre);
+	END IF;
+END;
+
+
+
+procedimiento2-----------------------
+create or replace PROCEDURE PLSQL3_EJ4_comprobar (
+	numEmpno employees.empno%type,
+	v_existe OUT number
+) AS
+	v_empno employees.empno%type;
+BEGIN
+	select empno into v_empno
+	from employees
+  where empno=numEmpno;
+EXCEPTION
+	WHEN NO_DATA_FOUND THEN
+		v_existe:=0;
+	WHEN OTHERS THEN	
+		DBMS_OUTPUT.PUT_LINE('Error inesperado');
+END;

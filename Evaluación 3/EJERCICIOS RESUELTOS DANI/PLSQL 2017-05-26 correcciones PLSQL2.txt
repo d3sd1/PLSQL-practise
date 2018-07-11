@@ -1,0 +1,92 @@
+CORRECIONES PLSQL2
+
+------------------------------------------------------------------
+EJERCICIO 1
+------------------------------------------------------------------
+CREATE OR REPLACE PROCEDURE H2EJ1 (codigo courses.code%type) AS
+	v_descripcion courses.description%type;
+	v_categoria courses.category%type;
+	v_duracion courses.duration%type;
+	
+	BEGIN
+		select description, category, duration into v_descripcion, v_categoria, v_duracion
+		from courses
+		where code=codigo;
+		dbms_output.put_line('Descripcion: '||v_descripcion||
+							' Categoría: '||v_categoria||
+							' Duración: '||v_duracion);
+		
+		EXCEPTION
+			WHEN DATA_NOT_FOUND then
+				dbms_output.put_line('El curso no existe');
+			WHEN OTHERS THEN
+				dbms_output.put_line('Error inesperado');
+	END;
+	
+	
+------------------------------------------------------------------
+EJERCICIO 2
+------------------------------------------------------------------
+DECLARE
+	v_empno employees.empno%type:=&v;
+	v_empno_tabla registrations.attendee%type;
+
+	BEGIN
+		select attendee into v_empno_tabla
+		from registrations
+		where attendee=v_empno;
+		DBMS_OUTPUT.PUT_LINE('El empleado ha recibido un curso');
+	EXCEPTION
+		WHEN NO_DATA_FOUND THEN
+			DBMS_OUTPUT.PUT_LINE('El empleado no ha recibido un curso');
+		WHEN TOO_MANY_ROWS THEN
+			DBMS_OUTPUT.PUT_LINE('El empleado ha recibido más de un curso');
+	END;
+	
+	
+------------------------------------------------------------------
+EJERCICIO 2 BIS
+------------------------------------------------------------------
+	
+DECLARE
+	v_empno employees.empno%type:=&v;
+	v_empno_tabla registrations.attendee%type;
+	
+	CURSOR C1 IS
+		select course, begindate, evaluation
+		from registrations
+		where attendee=v_empno;
+
+	BEGIN
+		select attendee into v_empno_tabla
+		from registrations
+		where attendee=v_empno;
+		DBMS_OUTPUT.PUT_LINE('El empleado ha recibido un curso');
+	EXCEPTION
+		WHEN NO_DATA_FOUND THEN
+			DBMS_OUTPUT.PUT_LINE('El empleado no ha recibido un curso');
+		WHEN TOO_MANY_ROWS THEN
+			for reg in c1 loop
+				dbms_output.put_line('Código: '||reg.course||
+									' Fecha: '||reg.begindate||
+									' Evaluación: '||reg.evaluation);
+			end loop;
+	END;
+	
+------------------------------------------------------------------
+EJERCICIO 3
+------------------------------------------------------------------
+CREATE OR REPLACE PROCEDURE PLSQL2_EJER3 (nota NUMBER) AS
+BEGIN
+    case
+      WHEN nota in (5,6) then DBMS_OUTPUT.PUT_LINE('Aprobado');
+      WHEN nota in (7,8) then DBMS_OUTPUT.PUT_LINE('Notable');
+	  WHEN nota in (9,10) then DBMS_OUTPUT.PUT_LINE('Sobresaliente');
+    end case;
+EXCEPTION
+	WHEN CASE_NOT_FOUND THEN
+		DBMS_OUTPUT.PUT_LINE('Valor no comprendido');
+END;
+
+
+	

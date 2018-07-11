@@ -1,0 +1,21 @@
+10) Crear procedimiento que reciba el nº de empleado por parámetro y, si es jefe, muestre los cursos a los que ha asistido (código de curso, de fecha, localización)
+
+
+	CREATE OR REPLACE PROCEDURE EJ10
+	(
+		v_empno IN employees.empno%type;
+	)
+	AS
+		CURSOR cursorEmp IS
+		select r.course, r.begindate, o.location
+		from registrations r
+		join offerings o
+		on (r.course=o.course)
+		when r.attendee in (
+			select mgr
+			from employees;
+		)
+	BEGIN
+		
+	EXCEPTION
+	END;

@@ -1,0 +1,18 @@
+CREATE OR REPLACE TRIGGER Ej1
+BEFORE INSERT
+ON EMPLOYEES
+FOR EACH ROW
+DECLARE
+	v_grade salgrades.grade%type;
+BEGIN
+	select grade into v_grade
+	from salgrades
+	where :NEW.msal between lowerlimit and upperlimit;
+	
+	if v_grade=3 then
+		:NEW.comm:=0;
+	end if;
+EXCEPTION
+	WHEN NO_DATA_FOUND THEN
+		DBMS_OUTPUT.PUT_LINE('El salario no se encuentra en ese grado');
+END;

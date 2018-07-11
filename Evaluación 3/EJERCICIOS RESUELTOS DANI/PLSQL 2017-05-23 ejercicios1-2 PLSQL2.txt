@@ -1,0 +1,87 @@
+CREATE OR REPLACE PROCEDURE PLSQL2_EJ1 (
+	vCod courses.code%type
+) AS
+	Cursor c1 is
+		select description, category, duration
+		from courses
+		where code=vCod;
+	vControl number:=0;
+
+BEGIN
+	for reg in c1 loop
+		DBMS_OUTPUT.PUT_LINE(reg.description||' '||reg.category||' '||reg.duration);
+		vControl:=1;
+	end loop;
+	
+	if vControl=0 then
+		DBMS_OUTPUT.PUT_LINE('No se ha encontrado ningún curso');
+	end if;
+	
+	EXCEPTION
+		WHEN OTHERS then
+			DBMS_OUTPUT.PUT_LINE('Error inesperado');
+END;
+
+
+
+
+
+--------------------------------------------------------------------------------------
+EJERCICIO APARTE
+------------------------------------------------------------------------
+por parámetro grado min y máx
+quiero que me aumente 100 euros todos los empleados en ese rango
+con cursor dentro de otro cursor y que uno dependa del parámetro del otro
+????????????????????????????
+
+CREATE OR REPLACE PROCEDURE EJERCICIO_APARTE (
+	v_gradomin salgrades.grade%type;
+	v_gradomax salgrades.grade%type;
+) AS
+
+	CURSOR C1 IS
+		select e.msal
+		from employees e
+		join salgrades s
+		on (e.msal between s.lowerlimit and s.upperlimit)
+		where grade between v_gradomin and v_gradomax;
+		for update of msal NOWAIT;
+
+BEGIN
+	for reg in c1 loop
+		update employees set msal=msal+100;
+	end loop;
+	
+END;
+
+????????????????????????????
+
+--------------------------------------------------------------------------------------
+
+PLSQL2_EJ2
+
+SET SERVEROUTPUT ON;
+
+DECLARE
+	v_empno employees.empno%type:=v;
+	vControl number:=0;
+	CURSOR C1 IS
+		select attendee
+		from registrations
+		where attendee=v_empno;
+
+BEGIN
+	for reg in c1 loop
+		DBMS_OUTPUT.PUT_LINE('El empleado sí está en un curso');
+		vControl:=1;
+	end loop;
+
+	if vControl=0 then
+		DBMS_OUTPUT.PUT_LINE('El empleado no ha recibido ningún curso');
+	end if;
+	
+
+END;
+
+
+

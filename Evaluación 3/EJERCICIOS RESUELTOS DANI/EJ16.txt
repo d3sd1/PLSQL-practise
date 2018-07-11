@@ -1,0 +1,65 @@
+create or replace PROCEDURE         "EJ16" 
+	(
+		P_EMPNO IN NUMBER 
+	)
+  AS 
+    P_EXISTE VARCHAR2(20); -- Aquí voy a almacenar el nombre para comprobar que existe
+	BEGIN
+    EXECUTE IMMEDIATE 'ALTER TABLE offerings DISABLE CONSTRAINT O_TRAIN_FK';
+    --Necesito desactivar esta constraint para que no me dé error.
+    --Para usar el comando DDL, al parecer debo usar el comando "EXECUTE IMMEDIATE"
+    
+    /*
+      Ejemplo del error que lanzaba:
+        Informe de error -
+        ORA-02292: restricción de integridad (CLASE.O_TRAIN_FK) violada - registro secundario encontrado
+        ORA-06512: en "CLASE.EJ16", línea 6
+        ORA-06512: en línea 2
+        02292. 00000 - "integrity constraint (%s.%s) violated - child record found"
+        *Cause:    attempted to delete a parent key value that had a foreign
+               dependency.
+        *Action:   delete dependencies first then parent or disable constraint.
+    */
+    
+		DELETE FROM employees
+		WHERE empno=P_EMPNO;
+    
+    /*
+      --En este punto, el empleado debería estar borrado.
+      --Para comprobarlo, si intentamos mostrar el nombre del empleado
+      --descomentando esto, debería dar error al ejecutar.
+      
+      SELECT ename
+      INTO P_EXISTE
+      FROM EMPLOYEES
+      WHERE empno=P_EMPNO;
+      DBMS_OUTPUT.PUT_LINE(P_EXISTE);
+    */
+    
+    /*
+      Ejemplo del error:
+        Informe de error -
+        ORA-01403: No se ha encontrado ningún dato
+        ORA-06512: en "CLASE.EJ16", línea 14
+        ORA-06512: en línea 2
+        01403. 00000 -  "no data found"
+    */
+    
+    --Deshacemos todo con un rollback (y reactivamos la constraint también por si acaso).
+    EXECUTE IMMEDIATE 'ROLLBACK';
+    EXECUTE IMMEDIATE 'ALTER TABLE offerings ENABLE CONSTRAINT O_TRAIN_FK';
+    
+    --Mostramos el nombre del empleado. Como hemos deshecho los cambios, no debería dar error.
+    SELECT ename
+    INTO P_EXISTE
+    FROM EMPLOYEES
+		WHERE empno=P_EMPNO;
+    DBMS_OUTPUT.PUT_LINE(P_EXISTE ||' ha sido borrado (y hemos realizado el rollback)');
+    
+    /*
+      En mi caso, muestra:
+        bloque anónimo terminado
+        SMITH ha sido borrado (y hemos realizado el rollback)
+    */
+    
+	END EJ16;

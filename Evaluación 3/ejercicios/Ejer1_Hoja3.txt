@@ -1,0 +1,39 @@
+create or replace PROCEDURE EJER1 
+(
+  NUM_EMP IN NUMBER 
+, NUM_DEP IN NUMBER 
+) AS 
+CURSOR c1 IS 
+    SELECT empno,ename,deptno FROM employees;
+vNombreEmpleado employees.ename%TYPE;
+vNombreDepartamento departments.dname%TYPE;
+BEGIN
+  SELECT ename into vNombreEmpleado FROM employees WHERE empno=NUM_EMP AND deptno=NUM_DEP;
+  SELECT dname INTO vNombreDepartamento FROM departments WHERE deptno=NUM_DEP;
+  DBMS_OUTPUT.PUT_LINE('Media salarial para el departamento con ID ' || NUM_DEP || ': ' || DEVOLVER_MEDIA_DEP(NUM_DEP));
+  EXCEPTION
+  WHEN NO_DATA_FOUND THEN
+  DBMS_OUTPUT.PUT_LINE('El empleado indicado no pertenece a dicho departamento. Mostrando empleados y departamento asociado...');
+  FOR reg1 IN c1 LOOP
+  DBMS_OUTPUT.PUT_LINE(reg1.ename || ' (' || reg1.empno || ') -> Departamento: ' || reg1.deptno);
+  END LOOP;
+  
+  WHEN OTHERS
+  DBMS_OUTPUT.PUT_LINE('Se ha producido un error.');
+END EJER1;
+------------------------
+create or replace FUNCTION DEVOLVER_MEDIA_DEP 
+(
+  NUM_DEP IN VARCHAR2 
+) RETURN NUMBER AS 
+vSalarioMedio NUMBER := 0;
+BEGIN
+  SELECT AVG(msal) INTO vSalarioMedio FROM employees WHERE deptno=NUM_DEP;
+  RETURN vSalarioMedio;
+END DEVOLVER_MEDIA_DEP;
+------------------
+DECLARE
+
+BEGIN
+EJER1(7369,20);
+END;

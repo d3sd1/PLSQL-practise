@@ -1,0 +1,79 @@
+CREATE OR REPLACE PROCEDURE EJER4_FUN1 
+(
+  vEmpno IN employees.empno%type,
+  vEname IN employees.ename%type,
+  vInit IN employees.init%type,
+  vJob IN employees.job%type,
+  vMgr IN employees.mgr%type,
+  vBdate IN employees.bdate%type,
+  vMsal IN employees.msal%type,
+  vComm IN employees.comm%type,
+  vDeptno IN employees.deptno%type
+) AS 
+vExiste NUMBER(1) := -1;
+eReglaViolada EXCEPTION;
+PRAGMA EXCEPTION_INIT(eReglaViolada, -02290);
+BEGIN
+  EJER4_FUN2(vEmpno,vExiste);
+  IF vExiste = 1 THEN
+    BEGIN
+      DBMS_OUTPUT.PUT_LINE('El empleado existe. Por ende, procedemos a actualizarlo: ');
+      UPDATE employees SET ename=vEname,init=vInit,job=vJob,mgr=vMgr,bdate=vBdate,msal=vMsal,comm=vComm,deptno=vDeptno WHERE empno=vEmpno;
+      DBMS_OUTPUT.PUT_LINE('Se ha actualizado el empleado correctamente.');
+      EXCEPTION
+        WHEN eReglaViolada THEN
+        DBMS_OUTPUT.PUT_LINE('Se ha producido un error al actualizar el empleado, debido a que se ha violado una restricción.');
+        WHEN OTHERS THEN
+        DBMS_OUTPUT.PUT_LINE('Se ha producido un error al insertar el empleado.');
+    END;
+  ELSIF vExiste = -1 THEN
+    DBMS_OUTPUT.PUT_LINE('¡Vaya! El valor no se actualizó. No sabemos si existe o no, asique mejor no tocaremos nada...');
+  ELSE
+    BEGIN
+      DBMS_OUTPUT.PUT_LINE('El empleado no existe. Por ende, procedemos a insertarlo: ');
+      INSERT INTO employees (empno,ename,init,job,mgr,bdate,msal,comm,deptno) VALUES (vEmpno,vEname,vInit,vJob,vMgr,vBdate,vMsal,vComm,vDeptno);
+      DBMS_OUTPUT.PUT_LINE('Se ha insertado al empleado correctamente.');
+      EXCEPTION
+        WHEN eReglaViolada THEN
+        DBMS_OUTPUT.PUT_LINE('Se ha producido un error al insertar el empleado, debido a que se ha violado una restricción.');
+        WHEN OTHERS THEN
+        DBMS_OUTPUT.PUT_LINE('Se ha producido un error al insertar el empleado.');
+    END;
+  END IF;
+END EJER4_FUN1;
+
+--------------
+
+CREATE OR REPLACE PROCEDURE EJER4_FUN2 
+(
+  vEmpno IN employees.empno%type,
+  vExiste OUT NUMBER
+) AS 
+vAuxiliar employees.empno%type;
+BEGIN
+  SELECT empno INTO vAuxiliar FROM employees WHERE empno=vEmpno;
+  vExiste := 1;
+  EXCEPTION
+    WHEN NO_DATA_FOUND THEN
+      vExiste := 0;
+    WHEN TOO_MANY_ROWS THEN
+      vExiste := 1;
+    WHEN OTHERS THEN
+      vExiste := 0;
+END EJER4_FUN2;
+
+---------------
+
+DECLARE
+vEmpno employees.empno%type := &empno;
+vEname employees.ename%type := &ename;
+vInit employees.init%type := &init;
+vJob employees.job%type := &job;
+vMgr employees.mgr%type := &mgr;
+vBdate employees.bdate%type := &bdate;
+vMsal employees.msal%type := &msal;
+vComm employees.comm%type := &comm;
+vDeptno employees.deptno%type := &deptno;
+BEGIN
+  EJER4_FUN1(vEmpno,vEname,vInit,vJob,vMgr,vBdate,vMsal,vComm,vDeptno);
+END;

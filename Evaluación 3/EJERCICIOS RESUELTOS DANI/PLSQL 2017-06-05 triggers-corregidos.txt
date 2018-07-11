@@ -1,0 +1,50 @@
+-----------------TRIGGERS_PLSQL1_EJ2-----------------
+
+	PLSQL_TRIGGERS1_EJ2
+
+	CREATE OR REPLACE TRIGGER HOJ1_2
+	BEFORE UPDATE OF MSAL
+	ON EMPLOYEES
+	FOR EACH ROW
+	BEGIN
+		insert into empleados_audit
+		values(:old.empno, :old.msal, :new.msal, sysdate);
+	EXCEPTION
+		WHEN OTHERS THEN
+			DBMS_OUTPUT.PUT_LINE('Error inesperado');
+	END;
+
+-----------------TRIGGERS_PLSQL6_EJ1-----------------
+
+	Create or replace trigger cont_salario
+		before update
+		on employees 
+		for each row
+			begin
+				if ((:new.msal/:old.msal)>1.2) then
+					//:new-msal:=old.msal;
+					RAISE_APPLICATION_ERROR(-20002,'No se puede modificar el salario en más de un 20%');
+				end if;
+	end;
+	
+-----------------TRIGGERS_PLSQL6_EJ2-----------------
+
+	Create or replace trigger borrado_emp
+	before delete
+	on employees
+	BEGIN
+		RAISE_APPLICATION_ERROR(-20003,'No se puede borrar empleados');
+	END;
+
+	
+-----------------TRIGGERS_PLSQL6_EJ4-----------------
+
+	Create or replace trigger
+	before delete
+	on employees
+	for each row
+	BEGIN
+		IF (USER<>'ADMIN')THEN
+			RAISE_APPLICATION_ERROR(-20004, 'Se necesita ser administrador');
+		END IF;
+	END;

@@ -1,0 +1,26 @@
+SET SERVEROUTPUT ON;
+DECLARE
+  V_LOCALIDAD VARCHAR2(50);
+BEGIN
+  EJ18(7369, V_LOCALIDAD);
+IF V_LOCALIDAD IS NOT NULL THEN
+   DBMS_OUTPUT.PUT_LINE(V_LOCALIDAD);
+ELSE
+   DBMS_OUTPUT.PUT_LINE('El departamento está vacío');
+END IF; 
+END;
+
+---------PROCEDIMIENTO EJ18-------
+CREATE OR REPLACE PROCEDURE EJ18
+(
+  P_EMPNO IN NUMBER 
+, P_LOCALIDAD OUT VARCHAR2 
+) AS 
+BEGIN
+  select d.location
+  into P_LOCALIDAD
+  from departments d
+  join employees e
+  on d.deptno=e.deptno
+  where e.empno=P_EMPNO;
+END EJ18;

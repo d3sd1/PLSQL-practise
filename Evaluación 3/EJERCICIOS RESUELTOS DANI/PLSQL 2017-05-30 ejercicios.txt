@@ -1,0 +1,66 @@
+4. 
+Crear un procedimiento
+al que le pase los campos de la tabla empleados que pediré por teclado desde un bloque anónimo, 
+y, mediante otro procedimiento con paso de parámetro OUT, me compruebe que el empno no existe en la tabla de empleados. 
+
+	En caso de que exista, se actualizarán los datos,
+	en caso de que no exista se dará de alta al empleado en la tabla
+(tanto la actualización como la inserción se harán desde el procedimiento principal).
+
+
+
+--------bloque anónimo------
+DECLARE
+	v_empno employees.empno%type :=&v,
+	v_ename employees.ename%type :=&v
+BEGIN
+	PLSQL3_EJ4(v_empno, v_ename);
+END;
+
+
+--------procedimiento principal------
+
+CREATE OR REPLACE PROCEDURE PLSQL3_EJ4 (
+	v_num employees.empno%type,
+	v_nombre employees.empno%type
+) AS
+	v_existe number(1) :=1
+BEGIN
+	PLSQL3_EJ4_comprobar(v_num, v_existe);
+	
+	IF v_existe=0 THEN 
+		RAISE_APPLICATION_ERROR(-20001,'No existe ese empleado'); 
+		-- añadir empleado a la tabla
+		alter employees add v_num, v_nombre, null, null, null, null (hasta 14)
+	else then
+		--actualizar datos
+		update employees set empno
+		where empno=v_num;		
+	END IF; 
+END;
+
+
+--------procedimiento comprobar------
+CREATE OR REPLACE PROCEDURE PLSQL3_EJ4_comprobar (
+	numEmpno employees.empno%type,
+	v_existe OUT number(1):=1;
+) AS
+	v_empno employees.empno%type;
+BEGIN
+	select empno into v_empno
+	from employees;
+	
+EXCEPTION
+	WHEN DATA_NOT_FOUND THEN
+		v_existe:=0;
+	WHEN OTHERS THEN	
+		DBMS_OUTPUT.PUT_LINE('Error inesperado');
+END;
+
+
+
+
+
+
+
+

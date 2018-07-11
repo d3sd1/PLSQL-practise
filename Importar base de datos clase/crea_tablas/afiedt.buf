@@ -1,0 +1,7 @@
+select  r.*
+ from registrations r, employees e, departments d
+where r.attendee=e.empno
+and e.deptno=d.deptno
+and e.ename='ALLEN'
+and d.dname='SALES'
+/

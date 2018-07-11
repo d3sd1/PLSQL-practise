@@ -1,0 +1,69 @@
+CORRECCIÓN EJERCICIOS PL/SQL
+(SET SERVEROUTPUT ON)
+
+
+
+1. (Media)
+
+DECLARE
+	v_num number := &v;
+	d_num number := &d;
+	x number;
+BEGIN
+	x:=(v_num+d_num)/2;
+	DBMS_OUTPUT.PUT_LINE('MEDIA:'||x);
+END;
+
+------------------------------------------
+3.
+
+DECLARE
+	horas number (8,0):=0;
+	minutos number (8,0):=0;
+	segundos number (8,0):=0;
+	tiempo number (8,0):=&t;
+BEGIN
+	minutos:=tiempo/60;
+	segundos:=tiempo mod 60;
+	horas:=minutos/60;
+	minutos:=minutos mod 60;
+	DBMS_OUTPUT.PUT_LINE('Hora:'||horas||':'||minutos||':'||segundos);
+END;
+------------------------------------------
+4.
+
+DECLARE
+	v_cap number(10);
+BEGIN
+	select sum(capacidad) into v_cap
+	from locales
+	where edificio like 'information';
+	DBMS_OUTPUT.PUT_LINE(v_cap);
+END;
+
+------------------------------------------
+7.
+
+DECLARE
+	vcadena varchar2(10):=&v;
+	vcadreves varchar2(10);
+BEGIN
+	for i in reverse i.length(vcadena) LOOP
+		vcadreves:=vcadenas||substring(vcadena,i,1);
+	END loop;
+	DBMS_OUTPUT.PUT_LINE(vcadreves);
+END;
+	
+
+
+
+
+
+
+
+
+
+
+
+
+

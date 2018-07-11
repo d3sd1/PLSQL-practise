@@ -1,0 +1,5 @@
+1. AND
+2. OR
+
+SELECT 'is true' as condition FROM dual WHERE 1=1 OR 1=0 AND 0=1;
+Devuelve true, ya que primero compara 1=0 AND 0=1 (FALSE AND FALSE) -> true y después 1=1 OR TRUE y devolvería true.

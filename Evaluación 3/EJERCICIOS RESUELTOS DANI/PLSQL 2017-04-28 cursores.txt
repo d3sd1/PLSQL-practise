@@ -1,0 +1,32 @@
+crear un cursor con:
+	número empleado
+	nombre
+	lo que ganan los empleados del departamento 10
+
+SET SERVEROUTPUT ON;
+DECLARE
+	--1. Declarar cursor
+		CURSOR cursor1 IS
+			select empno, ename, msal
+			from employees
+			where deptno=10;
+
+	--Declarar variables donde almacenaremos cada registro
+		v_empno employees.empno%type;
+		v_ename employees.ename%type;
+		v_msal employees.msal%type;
+	
+BEGIN
+	--2. Abrir cursor
+		OPEN cursor1;
+	
+	--3. Procesar cursor
+		LOOP
+			FETCH cursor1 INTO v_empno, v_ename, v_msal;
+			EXIT WHEN cursor1%NOTFOUND;
+			DBMS_OUTPUT.PUT_LINE(v_empno||','||v_ename||','||v_msal);
+		END LOOP;
+	
+	--4.Cerrar cursor
+		CLOSE cursor1;
+END;

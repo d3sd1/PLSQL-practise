@@ -1,0 +1,109 @@
+PLSQL3
+
+1. Crear un procedimiento que reciba un número de empleado por parámetro y un número de departamento.
+
+- Si pertenece a dicho departamento
+	-llame a una función que devuelva la media salarial del departamento
+	-Mostrar por pantalla nombre del departamento y la media desde el procedimiento.
+- Si no pertenece al departamento, que muestre el nombre de todos los empleados y el nombre de los departamentos a los que pertenece.
+
+
+			CREATE OR REPLACE PROCEDURE PLSQL3_EJ1_P(
+				v_empno empno.employees%type,
+				v_deptno deptno.employees%type
+			)
+			AS
+				v_empno_into empno.employees%type;
+				v_deptno_into deptno.employees%type;
+				v_avg_msal msal.employees%type;
+				v_dname_into dname.employees%type;
+
+				cursor c1 is
+					select e.ename, d.dname
+					from employees e
+					join departments d
+					on (e.deptno=d.deptno);
+			BEGIN
+				select empno, deptno
+				into v_empno_into, v_deptno_into
+				from employees
+				where empno=v_empno;
+				
+				if v_deptno_into=v_deptno then
+					v_avg_msal = EJ1_F(msal);
+					
+					select dname
+					into v_dname_into
+					from departments
+					where deptno=v_deptno_into;
+					
+					DBMS_OUTPUT('Media: '||v_avg_msal||' Nombre dpto:'||v_dname_into);
+				else
+					for reg in c1 loop
+						DBMS_OUTPUT.PUT_LINE('Nombre empleado: '||reg.ename||' Nombre departamento: '||reg.dname);
+					end loop;
+				end if;
+				
+			EXCEPTION
+				WHEN NO_DATA_FOUND THEN
+					DBMS_OUTPUT.PUT_LINE('El empleado no existe');
+			END;
+
+			
+			
+--------------------------------------------------------------
+2. Realizar una función que calcule el salario medio de
+	un departamento que se le pasará como parámetro.
+	
+Realizar un procedimiento que, haciendo uso de dicha función,
+	saque los empleados cuyo salario es mayor que dicho salario.
+Lógicamente, el procedimiento recibirá como parámetro el número del departamento del cual tenemos que hallar la media.
+
+	PROCEDIMIENTO
+		CREATE OR REPLACE PROCEDURE PLSQL3_EJ2_P (
+		  numDep employees.deptno%type
+		)AS
+		  v_media number(10,2):=0;
+		  
+		  cursor c1 is
+			select ename
+			from employees
+			where msal>v_media;
+		BEGIN
+		  --v_media:=PLSQL3_EJ2_F(numDep);
+		  v_media:=media(numDep);
+		  
+		  for reg in c1 loop
+			DBMS_OUTPUT.PUT_LINE('El empleado '||reg.ename||' tiene un salario que sobrepasa la media de '||v_media);
+		  end loop;
+
+		EXCEPTION
+		  WHEN OTHERS THEN
+			DBMS_OUTPUT.PUT_LINE('Error inesperado.');
+		END;
+		
+	FUNCIÓN
+		CREATE OR REPLACE FUNCTION PLSQL3_EJ2_F (
+			numDep employees.deptno%type;
+		) RETURN number AS
+			v_media number(10,2):=0;
+		
+		BEGIN
+			select avg(msal)
+			into v_media
+			from employees
+			where numDep=deptno
+			group by deptno;
+			return v_media;
+		END:
+
+
+
+
+
+
+
+
+
+
+

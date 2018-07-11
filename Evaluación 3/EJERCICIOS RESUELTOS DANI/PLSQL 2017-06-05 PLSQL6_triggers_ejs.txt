@@ -1,0 +1,161 @@
+/*1. Crear un trigger sobre la table empleados que valide que el salario de un empleado no puede aumentarse en más de un 20%.*/
+
+	CREATE OR REPLACE TRIGGER PLSQL6_EJ1
+		BEFORE UPDATE OF MSAL ON EMPLOYEES
+		FOR EACH ROW
+		BEGIN
+			if (:new.msal > :old.msal*1.20) then
+				RAISE_APPLICATION_ERROR(-20001,'No se puede aumentar el salario en un 120%');	
+			end if;	
+		EXCEPTION
+			WHEN OTHERS THEN
+			  DBMS_OUTPUT.PUT_LINE('Error inesperado');
+	END;
+
+------------------------------------------------------------------------------------------------------
+
+/*2. Crear un trigger que impida el borrado de empleados.*/
+
+	CREATE OR REPLACE TRIGGER PLSQL6_EJ2
+		BEFORE DELETE ON EMPLOYEES
+		//FOR EACH ROW
+		BEGIN
+			RAISE_APPLICATION_ERROR(-20001,'No se pueden borrar los empleados');
+		EXCEPTION
+			WHEN OTHERS THEN
+			  DBMS_OUTPUT.PUT_LINE('Error inesperado');
+	END;
+
+------------------------------------------------------------------------------------------------------
+
+/*
+3. Crear un trigger que registre en una tabla de auditoria cualquier modificación del salario de un empleado. La tabla de auditoria tendrá la siguiente estructura.
+
+AUDIT (fecha_entrada date default sysdate, usuario_cambio  varchar2(50), valor antiguo  number, valor_nuevo)
+*/
+
+	--------------BLOQUE--------------------
+		CREATE TABLE EMPLOYEES_AUDIT2(
+			fecha_entrada date default sysdate,
+			usuario_cambio varchar2(50),
+			valor_antiguo number(6,2),
+			valor_nuevo number(6,2)
+		);
+		
+	--------------TRIGGER--------------
+		CREATE OR REPLACE TRIGGER PLSQL6_EJ3
+			BEFORE UPDATE OF MSAL ON EMPLOYEES
+			FOR EACH ROW
+			BEGIN
+				INSERT INTO EMPLOYEES_AUDIT2 VALUES(SYSDATE, :OLD.empno, :OLD.msal, :NEW.msal); 
+			
+			EXCEPTION
+				WHEN OTHERS THEN
+				  DBMS_OUTPUT.PUT_LINE('Error inesperado');
+		END;
+
+------------------------------------------------------------------------------------------------------	
+		
+/*4. Crear un trigger que solo permita borrar empleados si el usuario es ADMIN.*/
+
+	CREATE OR REPLACE TRIGGER PLSQL6_EJ4
+	BEFORE DELETE
+	ON EMPLOYEES
+	BEGIN
+		IF USER!='ADMIN' THEN
+			RAISE_APPLICATION_ERROR(-20000,'Se necesitan credenciales de administrador para borrar empleados');
+		END IF;
+		
+		EXCEPTION
+			WHEN OTHERS THEN
+				DBMS_OUTPUT.PUT_LINE('Error inesperado');
+	END;
+
+------------------------------------------------------------------------------------------------------
+
+/*
+5. Crear un procedimiento al que pasaremos 2 parámetros:
+ número de empleado y número de departamento.
+ 
+Debe comprobar que el empleado existe, si es así,
+	deberá ver si  su salario está por debajo del salario medio de su departamento 
+	(para lo cual utilizaremos una función que hallará el salario medio de un departamento pasado como parámetro)
+	actualizará su salario aumentándoselo en un 10%. 
+Si no existe el empleado,
+	nos centraremos en el departamento.
+	Miraremos que exista, si existe,
+		deberemos dar el número de empleados de ese departamento,
+		y sacaremos todos los empleados que han realizado algún curso en el año de la fecha actual.
+*/
+
+
+	CREATE OR REPLACE PROCEDURE PLSQL6_EJ5 (
+		numEmp employees.empno%type,
+		numDep departments.deptno%type
+	) AS
+		valorEmp employees.empno%type,
+		valorSalario employees.msal%type
+	BEGIN
+		select empno, msal into valorEmp, valorSalario
+		from employees
+		where valorEmp=numEmp;
+			//Si existe empleado
+			if valorSalario<media(numDep) then
+				update employees set msal = msal*1.10
+				where empno=numEmp;
+			end if;
+			
+		
+		EXCEPTION
+			WHEN NO_DATA_FOUND THEN
+			//No existe empleado
+				DECLARE
+					valorDep departments.deptno%type,
+					numEmpleadosDep number(2),
+					cursor c1 is
+						select e.ename
+						from employees e
+						join registrations r
+						on (e.empno=r.attendee)
+						where to_char(r.begindate,'yyyy')=to_char(sysdate,'yyyy');
+				BEGIN
+					select deptno into valorDep
+					from departments
+					where deptno=numDep;
+						//Existe el departamento
+
+							//el número de empleados de ese departamento
+								select count(*)
+								into numEmpleadosDep
+								from employees
+								where deptno=numDep;
+								DBMS_OUTPUT.PUT_LINE('El departamento tiene '||count(empno)||' empleados');
+					
+							//y sacaremos todos los empleados que han realizado algún curso en el año de la fecha actual
+								DBMS_OUTPUT.PUT_LINE('Han realizado un curso este año los siguientes empleados:');
+								for reg in c1 loop
+									DBMS_OUTPUT.PUT_LINE(reg.ename);
+								end loop;
+					
+					EXCEPTION
+						WHEN NO_DATA_FOUND THEN
+						//No existe el departamento
+							DBMS_OUTPUT.PUT_LINE('No existe el departamento');
+				END;	
+	END;
+	
+	
+
+
+------------------------------------------------------------------------------------------------------
+
+
+
+
+
+
+
+
+
+
+

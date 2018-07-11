@@ -1,0 +1,33 @@
+Si en SQL Developer pones esto (bloque anónimo)
+
+	select e.empno, e.msal, s.grade
+	from employees e
+	join salgrades s
+	on (e.msal BETWEEN s.lowerlimit and s.upperlimit)
+	for update of msal;
+
+Y en sqlplus (cmd) pones
+	update employees set ename='Paco'
+	where upper(ename)='ALLEN';
+	
+El cmd se queda bloqueado (has bloqueado todos los registros afectados por la select del developer, hasta que no se desenganche de ahí otros procesos no pueden tener acceso a esos registros).
+Hacemos un "ROLLBACK;" en Developer
+ROLLBACK;
+
+
+-------------
+
+Si pones
+
+	select e.empno, e.msal, s.grade
+	from employees e
+	join salgrades s
+	on (e.msal BETWEEN s.lowerlimit and s.upperlimit)
+	for update of msal NOWAIT;
+	
+Y en sqlplus (cmd) pones
+	update employees set ename='Paco'
+	where upper(ename)='ALLEN';
+	
+Con el NOWAIT, el cmd debería decir que no se puede porque el cursor está bloqueado o algo así (ve que está bloqueado pero no espera a que eso termine). Pero el cmd se queda pillado igualmente. ????.
+ROLLBACK;

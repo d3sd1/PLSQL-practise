@@ -1,0 +1,145 @@
+--------------------------------------------------------------------------------------
+PLSQL2_EJ2
+--------------------------------------------------------------------------------------
+SET SERVEROUTPUT ON;
+
+DECLARE
+	v_empno employees.empno%type:=&v;
+	vControl number:=0;
+	CURSOR C1 IS
+		select attendee
+		from registrations
+		where attendee=v_empno;
+    
+	CURSOR C2 IS
+		select empno
+		from employees
+		where empno=v_empno;
+	vControl2 number:=0;
+    
+BEGIN
+	for reg in c1 loop
+		vControl:=vControl+1;
+	end loop;
+  
+	for reg in c2 loop
+		vControl2:=vControl2+1;
+	end loop;
+
+  if vControl2=0 then 
+    DBMS_OUTPUT.PUT_LINE('El empleado no existe');
+  elsif vControl=0 then
+		DBMS_OUTPUT.PUT_LINE('El empleado no ha recibido ningún curso');
+	end if;
+  
+	if vControl=1 then
+		DBMS_OUTPUT.PUT_LINE('El empleado sí está en un curso');
+	end if;
+  
+  if vControl>1 then
+		DBMS_OUTPUT.PUT_LINE('El empleado ha recibido más de un curso ('||vControl||' cursos)');
+	end if;
+END;
+
+
+---------------------------------------------------------------------------------------
+EJ2 ALT
+--------------------------------------------------------------------------------------
+SET SERVEROUTPUT ON;
+
+DECLARE
+	v_empno employees.empno%type:=&v;
+	vControl number:=0;
+	CURSOR C1 IS
+		select attendee
+		from registrations
+		where attendee=v_empno;
+    
+BEGIN
+	for reg in c1 loop
+		vControl:=vControl+1;
+	end loop;
+
+  if vControl=0 then
+		RAISE_APPLICATION_ERROR(-20001,'El empleado no existe o no ha recibido ningún curso');
+	end if;
+  
+	if vControl=1 then
+		DBMS_OUTPUT.PUT_LINE('El empleado sí está en un curso');
+	end if;
+  
+  if vControl>1 then
+		RAISE_APPLICATION_ERROR(-20002,'El empleado ha recibido más de un curso ('||vControl||' cursos)');
+	end if;
+	
+EXCEPTION
+	WHEN OTHERS THEN
+		dbms_output.put_line('Error inesperado');
+END;
+------------------------------------------------------------------
+EJERCICIO 2BIS
+------------------------------------------------------------------
+DECLARE
+	v_empno employees.empno%type:=&v;
+	v_empno_tabla registrations.attendee%type;
+	
+	CURSOR C1 IS
+		select attendee, course, begindate, evaluation
+		from registrations
+		where attendee=v_empno;
+
+	BEGIN
+		select attendee into v_empno_tabla
+		from registrations
+		where attendee=v_empno;
+		DBMS_OUTPUT.PUT_LINE('El empleado ha recibido un curso');
+	EXCEPTION
+		WHEN NO_DATA_FOUND THEN
+			DBMS_OUTPUT.PUT_LINE('El empleado no ha recibido un curso');
+		WHEN TOO_MANY_ROWS THEN
+			for reg in c1 loop
+				dbms_output.put_line('Código: '||reg.course||
+									' Fecha: '||reg.begindate||
+									' Evaluacion: '||reg.evaluation);
+			end loop;
+	END;
+---------------------------------------------------------------------------------------
+EJERCICIO 3
+---------------------------------------------------------------------------------------
+CREATE OR REPLACE PROCEDURE PLSQL2_EJER3 (v_nota NUMBER) AS
+	v number;
+BEGIN
+  select
+    case v_nota
+      WHEN 5 then 1
+      WHEN 6 then 1
+      WHEN 7 then 2
+      WHEN 8 then 2
+      WHEN 9 then 3
+      WHEN 10 then 3
+    end
+    into v
+  from dual;
+		
+	DBMS_OUTPUT.PUT_LINE(v);
+
+EXCEPTION
+	WHEN CASE_NOT_FOUND THEN
+		DBMS_OUTPUT.PUT_LINE('No hay valores');
+
+END;
+
+----ANÓNIMO----
+BEGIN
+  PLSQL2_EJER3(6);
+END;
+
+---------------------------------------------------------------------------------------
+EJERCICIO 4
+---------------------------------------------------------------------------------------
+CREATE OR REPLACE PROCEDURE PLSQL2_EJ4 (v_deptno departments.deptno%type) AS
+	//pragma_exception_init
+BEGIN
+
+	
+END;
